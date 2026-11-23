@@ -1,0 +1,100 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: searchx_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-searchx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-searchx_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-searchx}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-searchx} -d ${POSTGRES_DB:-searchx}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - searchx_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: searchx_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - searchx_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: searchx_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SEARCHX_ADMIN_KEY: ${SEARCHX_ADMIN_KEY:-searchx-admin-secret}
+      SEARCHX_ENGINE_BIN: /app/core-engine/build/searchx_engine
+      SEARCHX_INDEX_PATH: /data/searchx_index.bin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-searchx}:${POSTGRES_PASSWORD:-searchx_secure_pass}@postgres:5432/${POSTGRES_DB:-searchx}
+      REDIS_URL: redis://redis:6379/0
+      SEARCHX_CACHE_ENABLED: "true"
+      SEARCHX_CACHE_TTL: "300"
+    ports:
+      - "8000:8000"
+    volumes:
+      - searchx_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - searchx_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: searchx_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - searchx_network
+
+volumes:
+  postgres_data:
+    name: searchx_postgres_data
+  redis_data:
+    name: searchx_redis_data
+  searchx_data:
+    name: searchx_index_data
+
+networks:
+  searchx_network:
+    name: searchx_network
+    driver: bridge

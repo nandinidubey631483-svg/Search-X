@@ -1,89 +1,210 @@
 # SearchX
 
-SearchX is an educational, industry-inspired document search engine built to demonstrate core information-retrieval concepts from first principles: web crawling and document ingestion, text normalization, custom C++ inverted index construction, Boolean query retrieval, TF-IDF and BM25 relevance ranking, and interactive web presentation.
+SearchX is an educational, industry-inspired document search engine built to demonstrate core information-retrieval concepts from first principles: web crawling and document ingestion, text normalization, custom C++ inverted index construction, Boolean query retrieval, TF-IDF and BM25 relevance ranking, Redis caching, PostgreSQL persistence, and a modern, high-performance web interface.
 
 ---
 
 ## Architecture Overview
 
 ```text
-Admin adds approved source / imports documents
-                 |
-                 v
-        Python Crawler / Importer
-                 |
-                 v
-        HTML and Document Extraction
-                 |
-                 v
-        Text Normalization Pipeline
-                 |
-                 v
-           Canonical Document
-                 |
-          +------+------+
-          |             |
-          v             v
-      PostgreSQL    C++ Index Engine
-      Metadata      Inverted Index
-                        |
-                        v
-                 Ranking Statistics (TF-IDF & BM25)
-```
-
-### Search Flow
-
-```text
-User  --->  React UI  --->  FastAPI Backend  --->  Redis Cache (optional)
-                                    |
-                                    v
-                           C++ Retrieval Engine
-                                    |
-                                    v
-                             Ranked Results
+       [ Admin / Seed Sources / Web Crawler ]
+                         |
+                         v
+       [ Python Crawler & Ingestion Pipeline ]
+       - Domain Allowlisting & SSRF DNS Guard
+       - Robots.txt Politeness & Depth Bounds
+                         |
+                         v
+       [ HTML Parsing & Text Normalization ]
+       - Unicode NFKC Normalization & Lowercasing
+       - Positional Tokenization & Term Offsets
+                         |
+           +-------------+-------------+
+           |                           |
+           v                           v
+  [ PostgreSQL 16 ]            [ C++ Core Engine ]
+  - Document Metadata          - Positional Inverted Index
+  - Crawl Job Logs             - Binary Index File (.bin)
+  - Query Analytics            - Okapi BM25 & TF-IDF Scoring
+           |                           |
+           +-------------+-------------+
+                         |
+                         v
+              [ FastAPI Backend API ]
+              - Query Orchestration & Validation
+              - Subprocess CLI Bridge to C++ Core
+              - Redis Query & Suggestion Cache (5m TTL)
+                         ^
+                         | (JSON REST API via Reverse Proxy)
+                         v
+                 [ Nginx Alpine ]
+                         ^
+                         | (HTTP / Port 3000)
+                         v
+             [ React 18 + Vite Frontend ]
+             - Search Hero & Live Autocomplete
+             - Category Views (Web, Images, Docs, News, Scholar)
+             - Lightbox Media Viewer & Dynamic Ambient Canvas
+             - Full Admin Control Center
 ```
 
 ---
 
 ## Technology Stack
 
-- **Core Engine:** C++ (C++17 or newer) — Inverted index, posting lists, Boolean query processor, TF-IDF and BM25 ranking.
-- **Crawler & Ingestion:** Python 3 — HTML parsing, text extraction, URL canonicalization, and crawl politeness (`robots.txt`, rate limits).
-- **Backend API:** Python + FastAPI — REST endpoints, query validation, and orchestration.
-- **Frontend:** React — Search interface, autocomplete suggestions, result snippets, and admin monitoring.
-- **Database:** PostgreSQL — Durable storage for document metadata, crawl jobs, and analytics.
-- **Cache:** Redis — Ephemeral query caching with strict invalidation (optional degradation).
-- **Build System:** CMake + Ninja for C++.
+| Layer | Technology | Key Capabilities |
+| :--- | :--- | :--- |
+| **Core Retrieval Engine** | **C++ (C++17)** | Inverted index, positional posting lists, Boolean query processor (AND/OR), TF-IDF, Okapi BM25 scoring, binary serialization. |
+| **Crawler & Ingestion** | **Python 3.12** | Controlled crawler, DNS-resolved SSRF guard, canonicalization, HTML text extraction, Unicode NFKC tokenization. |
+| **Backend Service** | **FastAPI + Uvicorn** | High-performance asynchronous REST API, request validation, C++ CLI orchestration, admin endpoints. |
+| **Query Cache** | **Redis 7** | Sub-millisecond query result caching, prefix suggestion caching, automatic TTL expiration, write-through invalidation. |
+| **Primary Database** | **PostgreSQL 16** | Durable document catalog, crawl job execution history, atomic search query counter analytics. |
+| **Frontend UI** | **React 18 + Vite** | Modern responsive interface, Lucide SVG iconography, hardware-accelerated ambient animations, image lightbox. |
+| **Web Server / Proxy** | **Nginx Alpine** | Gzip static compression, SPA client routing fallback, `/api/` reverse proxy. |
+| **Containerization** | **Docker & Compose** | Multi-stage production builds, non-root security execution, container healthchecks. |
 
 ---
 
-## Repository Structure
+## Quick Start with Docker Compose
 
-```text
-SearchX/
-├── PROJECT_CONTEXT.md          # Single source of truth for planning, architecture & status
-├── README.md                   # Project overview and setup instructions
-├── .gitignore                  # Multi-stack gitignore rules
-├── docs/                       # Architectural decisions and design documentation
-│   └── decisions/              # Architecture Decision Records (ADRs)
-├── core-engine/                # C++ inverted index and ranking engine (Milestone 2+)
-├── crawler/                    # Python crawler and document importer (Milestone 6)
-├── backend/                    # FastAPI orchestration service (Milestone 7)
-└── frontend/                   # React search user interface (Milestone 9)
+The simplest way to build, seed, and run the entire production SearchX stack is with Docker Compose.
+
+### 1. Clone & Configure Environment
+
+```bash
+git clone https://github.com/your-username/Searchx.git
+cd Searchx
+cp .env.example .env
+```
+
+### 2. Launch All Services
+
+```bash
+docker compose up --build -d
+```
+
+This automatically orchestrates:
+- **`postgres`** on port `5432` with healthchecks and persistent volume `searchx_postgres_data`.
+- **`redis`** on port `6379` with healthchecks and persistent volume `searchx_redis_data`.
+- **`backend`** on port `8000` (compiling the C++ engine in Stage 1 and launching FastAPI in Stage 2).
+- **`frontend`** on port `3000` (building React assets with Vite and serving via Nginx).
+
+### 3. Access the Application
+
+- **Web Search UI:** [http://localhost:3000](http://localhost:3000)
+- **Admin Dashboard:** [http://localhost:3000](http://localhost:3000) (Click **Admin Dashboard** in top navigation)
+- **Interactive API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **API Healthcheck:** [http://localhost:8000/api/health](http://localhost:8000/api/health)
+
+---
+
+## Local Development Setup
+
+If developing without Docker, you can run each service natively on your machine:
+
+### Prerequisites
+
+- **C++ Compiler:** GCC/MinGW-w64 or Clang supporting C++17.
+- **CMake & Ninja:** CMake 3.20+ and Ninja build system.
+- **Python:** Python 3.10+ with `pip`.
+- **Node.js:** Node.js v18+ with `npm`.
+
+### 1. Build the C++ Core Retrieval Engine
+
+```bash
+cd core-engine
+cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+ctest --test-dir build --output-on-failure
+cd ..
+```
+
+### 2. Set Up the Python Backend
+
+```bash
+# Create and activate virtual environment
+python -m venv venv
+# On Windows:
+.\venv\Scripts\Activate.ps1
+# On Linux/macOS:
+# source venv/bin/activate
+
+# Install dependencies
+pip install -r backend/requirements.txt
+```
+
+### 3. Seed Document Corpus & Build Initial Index
+
+```bash
+# Ingest educational documents into SQLite and C++ binary inverted index
+python scripts/seed_corpus.py
+```
+
+### 4. Start the FastAPI Backend Server
+
+```bash
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+### 5. Start the React Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev -- --host 127.0.0.1 --port 3000
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## API Endpoints Reference
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Service health status, C++ engine binary connectivity, and document count. |
+| `GET` | `/api/search` | Search query endpoint with `q`, `mode` (`bm25` or `tfidf`), `op` (`AND` or `OR`), `page`, and `page_size`. |
+| `GET` | `/api/suggestions` | Prefix term autocomplete recommendations (`q` query string). |
+| `GET` | `/api/documents/{doc_id}` | Retrieve complete document details, metadata, and full text body. |
+| `GET` | `/api/admin/sources` | List approved crawl domains (requires `X-Admin-Key` header). |
+| `POST` | `/api/admin/sources` | Add new domain to the crawler allowlist. |
+| `POST` | `/api/admin/crawl` | Trigger controlled background crawl job with depth and page constraints. |
+| `GET` | `/api/admin/analytics` | Search volume, top queries, and Redis cache hit/miss performance metrics. |
+
+---
+
+## Search Features & Capabilities
+
+- **BM25 & TF-IDF Relevance:** Configurable ranking model with length normalization and smooth inverse document frequency.
+- **Boolean Precision:** Supports strict `AND` intersection for exact matching or `OR` union for high recall.
+- **Positional Snippet Extraction:** Dynamically extracts the most relevant text excerpt highlighting queried terms.
+- **Category Navigation Directory:** Explore indexed resources across **Web**, **Images**, **Documents**, **News**, and **Scholar**.
+- **Visual Media Lightbox:** High-resolution technical schematics and image inspection with full-screen zoom, metadata, and asset download.
+- **Ambient Canvas:** Hardware-accelerated 60fps CSS aurora mesh orbs, rotating ambient rays, and drifting tech matrix grid.
+- **Production Redis Caching:** 5-minute TTL query cache with instantaneous cache-hit response times (<1.5ms).
+
+---
+
+## Running Test Suites
+
+SearchX enforces comprehensive test coverage across every component:
+
+```bash
+# 1. Run C++ Engine Unit Tests (Document, Inverted Index, BM25/TF-IDF, Binary Serialization)
+ctest --test-dir core-engine/build --output-on-failure
+
+# 2. Run Python Backend & Crawler Tests (57 test cases)
+pytest backend/tests crawler/tests -v
+
+# 3. Run React Frontend Unit Tests (15 test suites)
+npm --prefix frontend test
+
+# 4. Verify Frontend Production Build
+npm --prefix frontend run build
 ```
 
 ---
 
-## Development Prerequisites
+## License
 
-- **C++ Compiler:** Modern GCC / MinGW-w64 (UCRT) supporting C++17 or newer.
-- **Build Tool:** CMake 3.20+ and Ninja.
-- **Python:** Python 3.10+ with `pip`.
-- **Node.js:** Node.js v18+ with `npm`.
-- **Git:** Git 2.x+.
-
----
-
-## Project Context & Single Source of Truth
-
-For detailed requirements, milestone definitions, architecture boundaries, and the module tracker, refer to [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
+Educational and research project developed under the MIT License.

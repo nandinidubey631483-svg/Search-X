@@ -1,0 +1,16 @@
+.git
+.github
+.vscode
+.idea
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+node_modules
+frontend/node_modules
+frontend/dist
+core-engine/build
+searchx.db
+*.bin
+*.log

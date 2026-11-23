@@ -636,7 +636,7 @@ complete merely because files were generated.
   Module I: React frontend                Verified      Vite + React UI implemented with Search Hero, autocomplete search bar, filters (BM25/TF-IDF, AND/OR), result cards with term highlighting & scores, pagination, document inspection modal, Admin dashboard (source management, crawler job launcher, search & cache analytics), and isolated API service layer; 15/15 Vitest tests passing
   Admin dashboard                         Verified      Integrated within React Frontend (Module I) with API key authorization, domain allowlist management, controlled crawl job trigger with status/errors, and search/cache metrics dashboard
   Testing and benchmarks                  Verified      Comprehensive testing suite (4 CTest suites, 57 pytest suites, 15 Vitest suites, e2e integration test) and benchmark harness (docs/BENCHMARKS.md) measuring indexing throughput (553 docs/sec), query latency percentiles, and cache speedup (8.7x); all verified
-  Docker and deployment                   Not started   
+  Docker and deployment                   Verified      Multi-stage Dockerfiles for backend (Debian C++ CMake builder + Python 3.12 runtime) and frontend (Node Vite build + Nginx Alpine reverse proxy & SPA router); docker-compose.yml orchestrating PostgreSQL 16, Redis 7, FastAPI backend, and Nginx frontend with healthchecks, non-root security user, and persistent volumes; .env.example configuration template; verified
 
 Allowed statuses: `Not started`, `In progress`, `Implemented`,
 `Verified`, `Blocked`.
