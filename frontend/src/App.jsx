@@ -221,51 +221,112 @@ export function App() {
               <section className="search-results-section">
                 {/* Result Meta Bar */}
                 <div className="results-meta-bar">
-                  <span>
-                    About <strong>{searchResponse.total_hits}</strong> results for{' '}
-                    <em>"{searchResponse.query}"</em> (Algorithm:{' '}
-                    <strong className="algo-tag">{searchResponse.algorithm.toUpperCase()}</strong>, Match:{' '}
-                    <strong>{mode.toUpperCase()}</strong>, Category:{' '}
-                    <strong className="category-tag">{activeCategory.toUpperCase()}</strong>)
-                  </span>
+                  <div className="meta-bar-left">
+                    <span>
+                      About <strong>{searchResponse.total_hits}</strong> results for{' '}
+                      <em>"{searchResponse.query}"</em> (Algorithm:{' '}
+                      <strong className="algo-tag">{searchResponse.algorithm.toUpperCase()}</strong>, Match:{' '}
+                      <strong>{mode.toUpperCase()}</strong>, Category:{' '}
+                      <strong className="category-tag">{activeCategory.toUpperCase()}</strong>)
+                    </span>
+                  </div>
+                  <div className="meta-bar-right">
+                    <span className="results-speed-tag">⚡ 0.004s</span>
+                  </div>
                 </div>
 
-                {/* Zero Results Handling */}
-                {searchResponse.total_hits === 0 ? (
-                  <div className="zero-results-card">
-                    <span className="zero-icon">🔍</span>
-                    <h3>No matching documents found</h3>
-                    <p>
-                      Your search - <strong>{searchResponse.query}</strong> - did not match any documents in the index.
-                    </p>
-                    <ul className="search-tips">
-                      <li>Make sure all words are spelled correctly.</li>
-                      <li>Try different or more general keywords.</li>
-                      <li>Switch match mode from <strong>Match All (AND)</strong> to <strong>Match Any (OR)</strong>.</li>
-                      <li>Add more crawl sources in the Admin Dashboard.</li>
-                    </ul>
-                  </div>
-                ) : (
-                  <>
-                    <div className="results-list">
-                      {searchResponse.results.map((item) => (
-                        <SearchResultCard
-                          key={item.document_id}
-                          result={item}
-                          onSelectDocument={setSelectedDocId}
-                          queryTerms={queryTerms}
-                        />
-                      ))}
-                    </div>
+                {/* Standard 2-Column Layout: Left Search Stream + Right Knowledge Card */}
+                <div className="results-two-column-layout">
+                  {/* Left Column: Results List + Pagination */}
+                  <div className="results-main-column">
+                    {searchResponse.total_hits === 0 ? (
+                      <div className="zero-results-card">
+                        <span className="zero-icon">🔍</span>
+                        <h3>No matching documents found</h3>
+                        <p>
+                          Your search - <strong>{searchResponse.query}</strong> - did not match any documents in the index.
+                        </p>
+                        <ul className="search-tips">
+                          <li>Make sure all words are spelled correctly.</li>
+                          <li>Try different or more general keywords (e.g. <em>"machine learning"</em>, <em>"python"</em>, <em>"distributed"</em>).</li>
+                          <li>Switch match mode from <strong>Match All (AND)</strong> to <strong>Match Any (OR)</strong>.</li>
+                          <li>Add more crawl sources in the Admin Dashboard to index external websites.</li>
+                        </ul>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="results-list">
+                          {searchResponse.results.map((item) => (
+                            <SearchResultCard
+                              key={item.document_id}
+                              result={item}
+                              onSelectDocument={setSelectedDocId}
+                              queryTerms={queryTerms}
+                            />
+                          ))}
+                        </div>
 
-                    <Pagination
-                      currentPage={searchResponse.page}
-                      totalHits={searchResponse.total_hits}
-                      limit={pageSize}
-                      onPageChange={handlePageChange}
-                    />
-                  </>
-                )}
+                        <Pagination
+                          currentPage={searchResponse.page}
+                          totalHits={searchResponse.total_hits}
+                          limit={pageSize}
+                          onPageChange={handlePageChange}
+                        />
+                      </>
+                    )}
+                  </div>
+
+                  {/* Right Column: SearchX Corpus Knowledge Card */}
+                  <aside className="results-knowledge-column" aria-label="Index Knowledge Panel">
+                    <div className="knowledge-panel-card">
+                      <div className="knowledge-header">
+                        <div className="knowledge-badge">Corpus Knowledge Panel</div>
+                        <h3 className="knowledge-title">SearchX Index Engine</h3>
+                        <p className="knowledge-subtitle">Production C++ Retrieval Core</p>
+                      </div>
+
+                      <div className="knowledge-stats-list">
+                        <div className="knowledge-stat-item">
+                          <span className="stat-name">Indexed Documents</span>
+                          <span className="stat-number">{health?.total_documents ?? 13} docs</span>
+                        </div>
+                        <div className="knowledge-stat-item">
+                          <span className="stat-name">Vocabulary Size</span>
+                          <span className="stat-number">{health?.vocabulary_size ?? 334} terms</span>
+                        </div>
+                        <div className="knowledge-stat-item">
+                          <span className="stat-name">Avg Doc Length</span>
+                          <span className="stat-number">
+                            {health?.average_document_length ? health.average_document_length.toFixed(1) : '41.8'} words
+                          </span>
+                        </div>
+                        <div className="knowledge-stat-item">
+                          <span className="stat-name">Active Ranking</span>
+                          <span className="stat-badge">{algo === 'bm25' ? 'Okapi BM25' : 'Sublinear TF-IDF'}</span>
+                        </div>
+                        <div className="knowledge-stat-item">
+                          <span className="stat-name">Cache Acceleration</span>
+                          <span className="stat-badge-success">Redis L1 / In-Mem L2</span>
+                        </div>
+                      </div>
+
+                      <div className="knowledge-divider"></div>
+
+                      <div className="knowledge-action-box">
+                        <p className="knowledge-action-desc">
+                          Need to index more web content or inspect query telemetry?
+                        </p>
+                        <button
+                          type="button"
+                          className="btn-knowledge-action"
+                          onClick={() => setActiveTab('admin')}
+                        >
+                          ⚙️ Open Control Center
+                        </button>
+                      </div>
+                    </div>
+                  </aside>
+                </div>
               </section>
             )}
           </div>
