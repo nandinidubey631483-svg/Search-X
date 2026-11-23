@@ -6,6 +6,13 @@ import { SearchResultCard } from './components/SearchResultCard';
 import { Pagination } from './components/Pagination';
 import { DocumentModal } from './components/DocumentModal';
 import { AdminDashboard } from './components/AdminDashboard';
+import {
+  IconSearch,
+  IconTrendingUp,
+  IconZap,
+  IconAlertCircle,
+  IconSettings,
+} from './components/Icons';
 import './index.css';
 
 export function App() {
@@ -107,12 +114,12 @@ export function App() {
   };
 
   const trendingTopics = [
-    { label: 'Generative AI', icon: '🔥', query: 'artificial intelligence generative' },
-    { label: 'System Design', icon: '📈', query: 'distributed system architecture' },
-    { label: 'Machine Learning', icon: '📈', query: 'machine learning' },
-    { label: 'DevOps', icon: '📈', query: 'docker deployment pipeline' },
-    { label: 'Inverted Index', icon: '📈', query: 'inverted index postings' },
-    { label: 'Cloud Computing', icon: '📈', query: 'cloud computing redis' },
+    { label: 'Generative AI', icon: <IconZap size={13} />, query: 'artificial intelligence generative' },
+    { label: 'System Design', icon: <IconTrendingUp size={13} />, query: 'distributed system architecture' },
+    { label: 'Machine Learning', icon: <IconTrendingUp size={13} />, query: 'machine learning' },
+    { label: 'DevOps', icon: <IconTrendingUp size={13} />, query: 'docker deployment pipeline' },
+    { label: 'Inverted Index', icon: <IconTrendingUp size={13} />, query: 'inverted index postings' },
+    { label: 'Cloud Computing', icon: <IconTrendingUp size={13} />, query: 'cloud computing redis' },
   ];
 
   const queryTerms = query ? query.toLowerCase().split(/\s+/).filter(Boolean) : [];
@@ -169,7 +176,9 @@ export function App() {
               {!searchResponse && (
                 <div className="trending-section">
                   <div className="trending-header">
-                    <span className="trending-icon">📈</span>
+                    <span className="trending-icon">
+                      <IconTrendingUp size={15} />
+                    </span>
                     <span className="trending-title">Trending Searches</span>
                   </div>
 
@@ -193,7 +202,9 @@ export function App() {
             {/* Error State */}
             {error && (
               <div className="search-error-banner" role="alert">
-                <span className="error-icon">⚠️</span>
+                <span className="error-icon">
+                  <IconAlertCircle size={18} />
+                </span>
                 <div className="error-text">
                   <strong>Search Failed:</strong> {error}
                 </div>
@@ -231,7 +242,9 @@ export function App() {
                     </span>
                   </div>
                   <div className="meta-bar-right">
-                    <span className="results-speed-tag">⚡ 0.004s</span>
+                    <span className="results-speed-tag">
+                      <IconZap size={12} className="btn-inline-icon" /> 0.004s
+                    </span>
                   </div>
                 </div>
 
@@ -241,7 +254,9 @@ export function App() {
                   <div className="results-main-column">
                     {searchResponse.total_hits === 0 ? (
                       <div className="zero-results-card">
-                        <span className="zero-icon">🔍</span>
+                        <span className="zero-icon">
+                          <IconSearch size={36} />
+                        </span>
                         <h3>No matching documents found</h3>
                         <p>
                           Your search - <strong>{searchResponse.query}</strong> - did not match any documents in the index.
@@ -321,7 +336,7 @@ export function App() {
                           className="btn-knowledge-action"
                           onClick={() => setActiveTab('admin')}
                         >
-                          ⚙️ Open Control Center
+                          <IconSettings size={15} className="btn-inline-icon" /> Open Control Center
                         </button>
                       </div>
                     </div>

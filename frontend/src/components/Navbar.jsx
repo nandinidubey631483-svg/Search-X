@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconSettings } from './Icons';
 
 export function Navbar({ activeTab, onTabChange, health, darkMode, onToggleDarkMode }) {
   return (
@@ -111,7 +112,7 @@ export function Navbar({ activeTab, onTabChange, health, darkMode, onToggleDarkM
             onClick={() => onTabChange('admin')}
             title="Open SearchX Admin Control Center"
           >
-            <span className="shortcut-icon">⚙️</span>
+            <IconSettings size={15} />
             <span className="shortcut-text">Control Center</span>
           </button>
         </div>

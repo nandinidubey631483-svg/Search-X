@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
+import {
+  IconLock,
+  IconKey,
+  IconGlobe,
+  IconTerminal,
+  IconActivity,
+  IconPlay,
+  IconAlertCircle,
+  IconSearch,
+  IconBookOpen,
+  IconLayers,
+} from './Icons';
 
 export function AdminDashboard({ onSourceAdded }) {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('searchx_admin_key') || '');
@@ -152,7 +164,7 @@ export function AdminDashboard({ onSourceAdded }) {
           {apiKey ? (
             <div className="auth-active">
               <div className="auth-key-badge">
-                <span className="auth-icon">🔐</span>
+                <IconKey size={14} className="auth-icon" />
                 <span className="auth-text">Admin Authenticated</span>
               </div>
               <button type="button" className="btn-logout" onClick={handleClearKey}>
@@ -179,7 +191,9 @@ export function AdminDashboard({ onSourceAdded }) {
 
       {!apiKey ? (
         <div className="unauthorized-card">
-          <div className="unauthorized-icon">🔒</div>
+          <div className="unauthorized-icon">
+            <IconLock size={44} />
+          </div>
           <h2>Admin Authentication Required</h2>
           <p>
             Please enter your <code>X-Admin-API-Key</code> above to access source management, crawl triggers, and index telemetry.
@@ -198,21 +212,21 @@ export function AdminDashboard({ onSourceAdded }) {
               className={`admin-tab-btn ${activeSubTab === 'sources' ? 'active' : ''}`}
               onClick={() => setActiveSubTab('sources')}
             >
-              🌐 Allowed Sources ({sources.length})
+              <IconGlobe size={15} /> Allowed Sources ({sources.length})
             </button>
             <button
               type="button"
               className={`admin-tab-btn ${activeSubTab === 'crawl' ? 'active' : ''}`}
               onClick={() => setActiveSubTab('crawl')}
             >
-              🕷️ Ingestion & Crawl Jobs
+              <IconTerminal size={15} /> Ingestion & Crawl Jobs
             </button>
             <button
               type="button"
               className={`admin-tab-btn ${activeSubTab === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveSubTab('analytics')}
             >
-              📊 Analytics & Metrics
+              <IconActivity size={15} /> Analytics & Metrics
             </button>
           </div>
 
@@ -248,7 +262,11 @@ export function AdminDashboard({ onSourceAdded }) {
                 </form>
               </div>
 
-              {sourcesError && <div className="error-banner">⚠️ {sourcesError}</div>}
+              {sourcesError && (
+                <div className="error-banner">
+                  <IconAlertCircle size={15} /> {sourcesError}
+                </div>
+              )}
 
               {/* Configured Sources Table */}
               <div className="admin-card">
@@ -279,7 +297,9 @@ export function AdminDashboard({ onSourceAdded }) {
                           <tr key={s.domain}>
                             <td>
                               <div className="domain-cell">
-                                <span className="domain-icon">🌐</span>
+                                <span className="domain-icon">
+                                  <IconGlobe size={15} />
+                                </span>
                                 <span className="domain-name font-mono">{s.domain}</span>
                               </div>
                             </td>
@@ -387,14 +407,20 @@ export function AdminDashboard({ onSourceAdded }) {
                       className="btn-primary btn-crawl-dispatch"
                       disabled={crawlLoading || !seedUrls.trim()}
                     >
-                      {crawlLoading ? <span className="spinner-white"></span> : '🚀 Start Crawl & Index'}
+                      {crawlLoading ? <span className="spinner-white"></span> : <>
+                        <IconPlay size={14} className="btn-inline-icon" /> Start Crawl & Index
+                      </>}
                     </button>
                   </form>
                 </div>
 
                 {/* Right Column: Live Monitor & Completed Job */}
                 <div className="crawl-monitor-pane">
-                  {crawlError && <div className="error-banner">⚠️ {crawlError}</div>}
+                  {crawlError && (
+                    <div className="error-banner">
+                      <IconAlertCircle size={15} /> {crawlError}
+                    </div>
+                  )}
 
                   {crawlJobResult ? (
                     <div className="admin-card crawl-result-card">
@@ -437,7 +463,9 @@ export function AdminDashboard({ onSourceAdded }) {
                     </div>
                   ) : (
                     <div className="admin-card crawler-idle-card">
-                      <span className="idle-icon">🕷️</span>
+                      <span className="idle-icon">
+                        <IconTerminal size={32} />
+                      </span>
                       <h3>Crawler Pipeline Ready</h3>
                       <p>
                         Configure seed URLs on the left and click <strong>Start Crawl & Index</strong> to launch an ingestion job.
@@ -459,7 +487,11 @@ export function AdminDashboard({ onSourceAdded }) {
           {activeSubTab === 'analytics' && (
             <div className="admin-tab-content">
               {analyticsLoading && <div className="loading-state-box">Loading search and cache analytics...</div>}
-              {analyticsError && <div className="error-banner">⚠️ {analyticsError}</div>}
+              {analyticsError && (
+                <div className="error-banner">
+                  <IconAlertCircle size={15} /> {analyticsError}
+                </div>
+              )}
 
               {analytics && (
                 <>
@@ -468,7 +500,9 @@ export function AdminDashboard({ onSourceAdded }) {
                     <div className="stat-box kpi-card">
                       <div className="kpi-header">
                         <span className="stat-label">Total Searches</span>
-                        <span className="kpi-icon">🔍</span>
+                        <span className="kpi-icon">
+                          <IconSearch size={20} />
+                        </span>
                       </div>
                       <span className="stat-val">{analytics.total_searches}</span>
                       <span className="kpi-sub">Lifetime queries processed</span>
@@ -477,7 +511,9 @@ export function AdminDashboard({ onSourceAdded }) {
                     <div className="stat-box kpi-card">
                       <div className="kpi-header">
                         <span className="stat-label">Indexed Documents</span>
-                        <span className="kpi-icon">📚</span>
+                        <span className="kpi-icon">
+                          <IconBookOpen size={20} />
+                        </span>
                       </div>
                       <span className="stat-val text-primary">{analytics.index_stats?.total_documents || 0}</span>
                       <span className="kpi-sub">Active documents in index</span>
@@ -486,7 +522,9 @@ export function AdminDashboard({ onSourceAdded }) {
                     <div className="stat-box kpi-card">
                       <div className="kpi-header">
                         <span className="stat-label">Vocabulary Size</span>
-                        <span className="kpi-icon">🔤</span>
+                        <span className="kpi-icon">
+                          <IconLayers size={20} />
+                        </span>
                       </div>
                       <span className="stat-val">{analytics.index_stats?.vocabulary_size || 0}</span>
                       <span className="kpi-sub">Unique indexed terms</span>
@@ -495,7 +533,9 @@ export function AdminDashboard({ onSourceAdded }) {
                     <div className="stat-box kpi-card">
                       <div className="kpi-header">
                         <span className="stat-label">Avg Document Length</span>
-                        <span className="kpi-icon">📏</span>
+                        <span className="kpi-icon">
+                          <IconActivity size={20} />
+                        </span>
                       </div>
                       <span className="stat-val">{analytics.index_stats?.average_document_length || 0}</span>
                       <span className="kpi-sub">Words per document</span>

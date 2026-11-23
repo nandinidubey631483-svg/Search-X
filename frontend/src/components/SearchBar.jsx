@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
+import {
+  IconSearch,
+  IconMic,
+  IconCamera,
+  IconSliders,
+  IconX,
+  IconGlobe,
+  IconImage,
+  IconFileText,
+  IconNewspaper,
+  IconGraduationCap,
+} from './Icons';
 
 export function SearchBar({
   initialQuery = '',
@@ -99,18 +111,20 @@ export function SearchBar({
   };
 
   const categories = [
-    { id: 'web', label: 'Web', icon: '🌐' },
-    { id: 'images', label: 'Images', icon: '🖼️' },
-    { id: 'documents', label: 'Documents', icon: '📄' },
-    { id: 'news', label: 'News', icon: '📰' },
-    { id: 'scholar', label: 'Scholar', icon: '🎓' },
+    { id: 'web', label: 'Web', icon: <IconGlobe size={15} /> },
+    { id: 'images', label: 'Images', icon: <IconImage size={15} /> },
+    { id: 'documents', label: 'Documents', icon: <IconFileText size={15} /> },
+    { id: 'news', label: 'News', icon: <IconNewspaper size={15} /> },
+    { id: 'scholar', label: 'Scholar', icon: <IconGraduationCap size={15} /> },
   ];
 
   return (
     <div className="search-bar-container" ref={containerRef}>
       <form onSubmit={handleSubmit} className="search-form" role="search">
         <div className="input-wrapper">
-          <span className="search-icon-left">🔍</span>
+          <span className="search-icon-left">
+            <IconSearch size={20} />
+          </span>
 
           <input
             type="text"
@@ -135,8 +149,9 @@ export function SearchBar({
                 setSuggestions([]);
               }}
               title="Clear input"
+              aria-label="Clear input"
             >
-              ✕
+              <IconX size={16} />
             </button>
           )}
 
@@ -148,7 +163,7 @@ export function SearchBar({
             title={voiceActive ? 'Listening...' : 'Voice Search'}
             aria-label="Voice Search"
           >
-            🎙️
+            <IconMic size={18} />
           </button>
 
           {/* Visual / Document Search Lens Button */}
@@ -159,7 +174,7 @@ export function SearchBar({
             title="Visual / Document Lens"
             aria-label="Document Lens"
           >
-            📷
+            <IconCamera size={18} />
           </button>
 
           {/* Settings / Filters Toggle */}
@@ -170,7 +185,7 @@ export function SearchBar({
             title="Algorithm & Retrieval Filters"
             aria-label="Retrieval Filters"
           >
-            ⚙️
+            <IconSliders size={18} />
           </button>
 
           {/* Gradient Circular Submit Button matching the screenshot */}
@@ -181,7 +196,7 @@ export function SearchBar({
             title="Search"
             aria-label="Search"
           >
-            {loading ? <span className="spinner-white"></span> : '🔍'}
+            {loading ? <span className="spinner-white"></span> : <IconSearch size={18} />}
           </button>
         </div>
 
@@ -196,7 +211,9 @@ export function SearchBar({
                 role="option"
                 aria-selected="false"
               >
-                <span className="suggestion-icon">🔎</span>
+                <span className="suggestion-icon">
+                  <IconSearch size={14} />
+                </span>
                 <span className="suggestion-text">{item}</span>
               </li>
             ))}

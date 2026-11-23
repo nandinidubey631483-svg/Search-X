@@ -71,6 +71,19 @@ body {
   padding-bottom: 4rem;
 }
 
+/* SVG Icon Utilities */
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.btn-inline-icon {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-right: 0.35rem;
+}
+
 /* ==========================================================================
    Navbar
    ========================================================================== */

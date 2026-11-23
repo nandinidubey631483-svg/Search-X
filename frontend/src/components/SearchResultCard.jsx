@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconGlobe, IconFileText } from './Icons';
 
 export function SearchResultCard({ result, onSelectDocument, queryTerms = [] }) {
   // Highlight matched terms in snippet
@@ -43,7 +44,9 @@ export function SearchResultCard({ result, onSelectDocument, queryTerms = [] }) 
     <article className="result-card google-style" data-testid={`result-${result.document_id}`}>
       {/* Google-style Breadcrumb / Origin Row */}
       <div className="result-breadcrumb-row">
-        <span className="result-favicon">🌐</span>
+        <span className="result-favicon">
+          <IconGlobe size={15} />
+        </span>
         <div className="result-site-info">
           <span className="result-domain">{domain}</span>
           <span className="result-url" title={result.url}>
@@ -89,7 +92,7 @@ export function SearchResultCard({ result, onSelectDocument, queryTerms = [] }) 
           onClick={() => onSelectDocument(result.document_id)}
           aria-label={`View full document ${result.title}`}
         >
-          📄 View Full Document ({result.document_id})
+          <IconFileText size={14} className="btn-inline-icon" /> View Full Document ({result.document_id})
         </button>
         {result.url && (
           <a
