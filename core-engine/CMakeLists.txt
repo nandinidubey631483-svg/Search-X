@@ -15,6 +15,7 @@ endif()
 add_library(searchx_core STATIC
     src/inverted_index.cpp
     src/ranking.cpp
+    src/index_serializer.cpp
 )
 
 target_include_directories(searchx_core PUBLIC
@@ -38,3 +39,8 @@ add_test(NAME test_inverted_index COMMAND test_inverted_index)
 add_executable(test_ranking tests/test_ranking.cpp)
 target_link_libraries(test_ranking PRIVATE searchx_core)
 add_test(NAME test_ranking COMMAND test_ranking)
+
+# Index persistence unit tests
+add_executable(test_persistence tests/test_persistence.cpp)
+target_link_libraries(test_persistence PRIVATE searchx_core)
+add_test(NAME test_persistence COMMAND test_persistence)

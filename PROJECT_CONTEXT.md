@@ -628,7 +628,7 @@ complete merely because files were generated.
   Query processing                        Verified      Boolean AND/OR query candidate retrieval implemented and verified in C++ Ranker
   TF-IDF ranking                          Verified      Sublinear TF and smooth IDF formula verified against hand-calculated test corpus
   BM25 ranking                            Verified      Okapi BM25 scoring with configurable k1, b parameters, length normalization, and deterministic tie-breaking verified
-  Index persistence                       Not started   
+  Index persistence                       Verified      Binary serialization and deserialization with header/footer verification, integrity checks, and error rollback; all CTest unit tests passing
   Python crawler/importer                 Not started   
   FastAPI backend                         Not started   
   PostgreSQL                              Not started   

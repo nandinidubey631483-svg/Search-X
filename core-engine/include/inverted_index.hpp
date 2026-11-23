@@ -129,7 +129,19 @@ public:
      */
     void clear();
 
+    /**
+     * @brief Persist the index segment to disk.
+     */
+    bool save(const std::string& filepath, std::string* error_msg = nullptr) const;
+
+    /**
+     * @brief Restore an index segment from disk.
+     */
+    bool load(const std::string& filepath, std::string* error_msg = nullptr);
+
 private:
+    friend class IndexSerializer;
+
     uint32_t next_doc_id_ = 1;
     uint64_t total_corpus_tokens_ = 0;
 
