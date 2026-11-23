@@ -6,6 +6,8 @@ import { SearchResultCard } from './components/SearchResultCard';
 import { Pagination } from './components/Pagination';
 import { DocumentModal } from './components/DocumentModal';
 import { AdminDashboard } from './components/AdminDashboard';
+import { SmartImage } from './components/SmartImage';
+import { ImageLightboxModal } from './components/ImageLightboxModal';
 import {
   IconSearch,
   IconTrendingUp,
@@ -34,6 +36,7 @@ export function App() {
   const [searchResponse, setSearchResponse] = useState(null);
   const [error, setError] = useState(null);
   const [selectedDocId, setSelectedDocId] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [health, setHealth] = useState(null);
 
   // Dark / Light Theme State
@@ -182,6 +185,7 @@ export function App() {
         name: 'Unsplash',
         domain: 'unsplash.com',
         url: 'https://unsplash.com/',
+        bannerImg: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&auto=format&fit=crop&q=80',
         desc: 'High-resolution photography, creative wallpapers, and royalty-free visual media.',
         query: 'unsplash photography high resolution',
         badge: 'Stock Photos',
@@ -190,6 +194,7 @@ export function App() {
         name: 'Pexels',
         domain: 'pexels.com',
         url: 'https://www.pexels.com/',
+        bannerImg: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
         desc: 'Free stock photos, aesthetic desktop backgrounds, and royalty-free visual assets.',
         query: 'pexels stock photos wallpapers',
         badge: 'Wallpapers',
@@ -198,6 +203,7 @@ export function App() {
         name: 'Pixabay',
         domain: 'pixabay.com',
         url: 'https://pixabay.com/',
+        bannerImg: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
         desc: 'Copyright-free vector graphics, digital illustrations, clip art, and photo media.',
         query: 'pixabay vector graphics illustrations',
         badge: 'Vector & Art',
@@ -206,6 +212,7 @@ export function App() {
         name: 'Wikimedia Commons',
         domain: 'commons.wikimedia.org',
         url: 'https://commons.wikimedia.org/',
+        bannerImg: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
         desc: 'Public domain educational schematics, anatomical diagrams, and historical archives.',
         query: 'wikimedia commons scientific diagrams',
         badge: 'Educational Media',
@@ -214,6 +221,7 @@ export function App() {
         name: 'Openverse',
         domain: 'openverse.org',
         url: 'https://openverse.org/',
+        bannerImg: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
         desc: 'Universal search across 700M+ openly licensed Creative Commons images and cultural works.',
         query: 'openverse creative commons discovery',
         badge: 'Open License',
@@ -222,6 +230,7 @@ export function App() {
         name: 'SVG Repo',
         domain: 'svgrepo.com',
         url: 'https://www.svgrepo.com/',
+        bannerImg: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80',
         desc: '500,000+ scalable vector SVG icons, UI elements, and technical flowchart schematics.',
         query: 'svg repo vector icons schematics',
         badge: 'SVG Vectors',
@@ -416,49 +425,118 @@ export function App() {
     { label: 'Cloud Computing', icon: <IconTrendingUp size={13} />, query: 'cloud computing redis' },
   ];
 
-  // Visual Image Showcase Cards
+  // Helper function to map documents to rich visual previews
+  function getDocumentImageUrl(doc) {
+    const text = `${doc.title || ''} ${doc.snippet || ''} ${doc.document_id || ''} ${doc.url || ''}`.toLowerCase();
+    if (text.includes('unsplash') || text.includes('photo')) {
+      return 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('pexels') || text.includes('wallpaper')) {
+      return 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('pixabay') || text.includes('vector') || text.includes('svg')) {
+      return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('wikimedia') || text.includes('commons') || text.includes('diagram') || text.includes('schematic')) {
+      return 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('inverted') || text.includes('index') || text.includes('retrieval') || text.includes('postings')) {
+      return 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('bm25') || text.includes('ranking') || text.includes('score') || text.includes('tfidf')) {
+      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('redis') || text.includes('cache') || text.includes('memory')) {
+      return 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('neural') || text.includes('attention') || text.includes('transformer') || text.includes('pytorch') || text.includes('scholar')) {
+      return 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('docker') || text.includes('container') || text.includes('kubernetes')) {
+      return 'https://images.unsplash.com/photo-1607799279861-4dd421887fb3?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('linux') || text.includes('kernel') || text.includes('rust') || text.includes('cpp')) {
+      return 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=700&auto=format&fit=crop&q=80';
+    }
+    if (text.includes('python') || text.includes('fastapi') || text.includes('javascript') || text.includes('react')) {
+      return 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=700&auto=format&fit=crop&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=700&auto=format&fit=crop&q=80';
+  }
+
+  // Visual Image Showcase Cards with Real High-Res URLs and Procedural Fallbacks
   const visualGallery = [
     {
       title: 'Inverted Index Postings List Architecture',
-      subtitle: 'Term dictionary with binary delta-encoded docID lists',
-      dim: '1920×1080 SVG',
+      subtitle: 'Term dictionary with binary delta-encoded docID lists and skipping pointers',
+      dim: '3840×2160 UHD',
+      imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80',
       query: 'inverted index postings architecture',
       badge: 'Core Engine Spec',
+      category: 'schematic',
     },
     {
       title: 'Okapi BM25 Ranking Saturation Curve',
-      subtitle: 'Score vs Term Frequency with length normalization (k1=1.2, b=0.75)',
-      dim: '1280×720 Chart',
+      subtitle: 'Score vs Term Frequency with document length normalization (k1=1.2, b=0.75)',
+      dim: '2560×1440 2K',
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
       query: 'bm25 scoring normalization',
       badge: 'Algorithm Diagram',
+      category: 'schematic',
     },
     {
       title: 'Redis Multi-Tier Query Cache Topology',
-      subtitle: 'Sub-millisecond L1 memory cache with atomic invalidation',
-      dim: '1600×900 SVG',
+      subtitle: 'Sub-millisecond L1 memory cache with atomic TTL and invalidation',
+      dim: '1920×1080 FHD',
+      imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80',
       query: 'redis query cache invalidation',
       badge: 'Cache Architecture',
+      category: 'schematic',
+    },
+    {
+      title: 'Transformer Attention & Neural Synapses',
+      subtitle: 'Scaled dot-product attention and multi-head global sequence dependencies',
+      dim: '3840×2160 4K',
+      imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format&fit=crop&q=80',
+      query: 'transformer attention neural architecture',
+      badge: 'Deep Learning',
+      category: 'wallpaper',
     },
     {
       title: 'Web Crawler Safety & SSRF Guard',
       subtitle: 'Robots exclusion standard, DNS loopback block, and depth bounds',
-      dim: '1440×900 Diagram',
+      dim: '1920×1080 Diagram',
+      imageUrl: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80',
       query: 'web crawler robots ssrf',
-      badge: 'Crawler Protocol',
+      badge: 'Security Blueprint',
+      category: 'schematic',
     },
     {
       title: 'FastAPI & C++ Core Engine Bridge',
-      subtitle: 'Subprocess stdin/stdout query dispatch pipeline',
+      subtitle: 'Subprocess stdin/stdout query dispatch pipeline with JSON streaming',
       dim: '1920×1080 Schematic',
+      imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
       query: 'fastapi backend architecture',
       badge: 'Pipeline Schematic',
+      category: 'schematic',
     },
     {
       title: 'Distributed Consensus & Raft Cluster State',
       subtitle: 'Leader election, log replication, and split-brain resilience',
-      dim: '1600×900 SVG',
+      dim: '3840×2160 4K',
+      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80',
       query: 'distributed consensus raft',
       badge: 'Distributed Systems',
+      category: 'wallpaper',
+    },
+    {
+      title: 'Linux Kernel Virtual Memory Subsystem',
+      subtitle: 'Page allocation, slab allocators, and hardware memory mapping',
+      dim: '2560×1440 2K',
+      imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+      query: 'linux kernel virtual memory page',
+      badge: 'Kernel Blueprint',
+      category: 'schematic',
     },
   ];
 
@@ -647,8 +725,33 @@ export function App() {
                       </div>
 
                       <div className="category-sources-grid">
-                        {(categoryWebsites[activeCategory] || []).map((site) => (
-                          <div key={site.domain} className="category-source-card">
+                        {(categoryWebsites[activeCategory] || []).map((site, siteIdx) => (
+                          <div
+                            key={site.domain}
+                            className="category-source-card"
+                            style={{ '--card-index': siteIdx }}
+                          >
+                            {site.bannerImg && (
+                              <div className="source-banner-wrap">
+                                <SmartImage
+                                  src={site.bannerImg}
+                                  alt={site.name}
+                                  aspectRatio="16/9"
+                                  category="wallpaper"
+                                  onPreviewClick={() =>
+                                    setSelectedImage({
+                                      title: `${site.name} Visual Media Portal`,
+                                      subtitle: site.desc,
+                                      imageUrl: site.bannerImg,
+                                      badge: site.badge,
+                                      query: site.query,
+                                      dim: '3840×2160 UHD',
+                                      url: site.url,
+                                    })
+                                  }
+                                />
+                              </div>
+                            )}
                             <div className="source-card-header">
                               <div className="source-title-row">
                                 <span className="source-name">{site.name}</span>
@@ -714,27 +817,45 @@ export function App() {
                     {activeCategory === 'images' && (
                       <div className="category-content-subblock">
                         <div className="category-section-subtitle">
-                          <IconImage size={15} /> Visual Diagrams & Schematics Showcase
+                          <IconImage size={15} /> Curated Visual Gallery & Wallpapers
                         </div>
                         <div className="image-showcase-grid">
                           {visualGallery.map((item, idx) => (
                             <div
                               key={idx}
                               className="image-showcase-card"
-                              onClick={() => executeSearch(item.query, 1)}
-                              role="button"
-                              tabIndex={0}
+                              style={{ '--card-index': idx }}
                             >
-                              <div className="image-preview-placeholder">
-                                <IconImage size={28} className="preview-svg-icon" />
-                                <span className="image-dim-tag">{item.dim}</span>
-                              </div>
-                              <div className="image-card-info">
-                                <span className="image-spec-badge">{item.badge}</span>
+                              <SmartImage
+                                src={item.imageUrl}
+                                alt={item.title}
+                                aspectRatio="16/9"
+                                category={item.category || 'schematic'}
+                                onPreviewClick={() => setSelectedImage(item)}
+                              />
+                              <div
+                                className="image-card-info"
+                                onClick={() => setSelectedImage(item)}
+                              >
+                                <div className="image-card-header-row">
+                                  <span className="image-spec-badge">{item.badge}</span>
+                                  <span className="image-dim-tag">{item.dim}</span>
+                                </div>
                                 <h4 className="image-card-title">{item.title}</h4>
                                 <p className="image-card-sub">{item.subtitle}</p>
                                 <div className="image-card-action">
-                                  <span className="action-link">Search Schematic &rarr;</span>
+                                  <span className="action-link">Expand Image &rarr;</span>
+                                  <button
+                                    type="button"
+                                    className="btn-source-search"
+                                    style={{ flex: 'none', padding: '0.3rem 0.65rem', fontSize: '0.74rem' }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      executeSearch(item.query, 1);
+                                    }}
+                                  >
+                                    Search Topic
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -938,32 +1059,58 @@ export function App() {
                       <>
                         {activeCategory === 'images' ? (
                           <div className="image-results-grid">
-                            {searchResponse.results.map((item) => (
-                              <div
-                                key={item.document_id}
-                                className="image-result-card"
-                                onClick={() => setSelectedDocId(item.document_id)}
-                                role="button"
-                                tabIndex={0}
-                              >
-                                <div className="image-result-preview">
-                                  <IconImage size={32} className="image-grid-icon" />
-                                  <span className="image-dim-badge">1920×1080 SVG</span>
-                                </div>
-                                <div className="image-result-info">
-                                  <h4 className="image-result-title">{item.title}</h4>
-                                  <span className="image-result-domain font-mono">
-                                    {item.url || 'Internal Document'}
-                                  </span>
-                                  <div className="image-result-footer">
-                                    <span className="image-score-tag">
-                                      Score: {item.score ? item.score.toFixed(3) : '1.00'}
+                            {searchResponse.results.map((item, idx) => {
+                              const imgUrl = getDocumentImageUrl(item);
+                              return (
+                                <div
+                                  key={item.document_id}
+                                  className="image-result-card"
+                                  style={{ '--card-index': idx }}
+                                >
+                                  <SmartImage
+                                    src={imgUrl}
+                                    alt={item.title}
+                                    aspectRatio="16/10"
+                                    category="schematic"
+                                    onPreviewClick={() =>
+                                      setSelectedImage({
+                                        title: item.title,
+                                        subtitle: item.snippet,
+                                        imageUrl: imgUrl,
+                                        badge: 'Search Result',
+                                        dim: '1920×1080 FHD',
+                                        url: item.url,
+                                      })
+                                    }
+                                  />
+                                  <div className="image-result-info">
+                                    <h4
+                                      className="image-result-title"
+                                      onClick={() => setSelectedDocId(item.document_id)}
+                                      title="Read full indexed document"
+                                    >
+                                      {item.title}
+                                    </h4>
+                                    <span className="image-result-domain font-mono">
+                                      {item.url || 'Internal Document'}
                                     </span>
-                                    <span className="image-inspect-link">View Full Spec &rarr;</span>
+                                    <div className="image-result-footer">
+                                      <span className="image-score-tag">
+                                        Score: {item.score ? item.score.toFixed(3) : '1.00'}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="btn-source-search"
+                                        style={{ flex: 'none', padding: '0.2rem 0.55rem', fontSize: '0.72rem' }}
+                                        onClick={() => setSelectedDocId(item.document_id)}
+                                      >
+                                        Read Spec &rarr;
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         ) : (
                           <div className="results-list">
@@ -1050,6 +1197,15 @@ export function App() {
         <DocumentModal
           documentId={selectedDocId}
           onClose={() => setSelectedDocId(null)}
+        />
+      )}
+
+      {/* Image Lightbox Preview Modal */}
+      {selectedImage && (
+        <ImageLightboxModal
+          image={selectedImage}
+          onClose={() => setSelectedImage(null)}
+          onSearchRelated={(q) => executeSearch(q, 1)}
         />
       )}
 
