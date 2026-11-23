@@ -1,0 +1,1 @@
+"""SearchX FastAPI Backend Application"""

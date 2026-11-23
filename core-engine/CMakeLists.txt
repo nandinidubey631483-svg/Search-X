@@ -44,3 +44,7 @@ add_test(NAME test_ranking COMMAND test_ranking)
 add_executable(test_persistence tests/test_persistence.cpp)
 target_link_libraries(test_persistence PRIVATE searchx_core)
 add_test(NAME test_persistence COMMAND test_persistence)
+
+# SearchX Core Engine CLI (Python backend integration interface)
+add_executable(searchx_engine src/engine_cli.cpp)
+target_link_libraries(searchx_engine PRIVATE searchx_core)
