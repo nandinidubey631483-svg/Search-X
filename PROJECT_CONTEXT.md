@@ -631,10 +631,10 @@ complete merely because files were generated.
   Index persistence                       Verified      Binary serialization and deserialization with header/footer verification, integrity checks, and error rollback; all CTest unit tests passing
   Python crawler/importer                 Verified      DocumentImporter and controlled Crawler implemented with SSRF DNS IP validation, redirect checks, domain allowlist, robots.txt, and depth/page limits; tests passing
   FastAPI backend                         Verified      FastAPI endpoints implemented (/api/search, /api/suggestions, /api/documents, /api/health, /api/admin/*) integrated with C++ engine binary; all tests passing
-  PostgreSQL                              Verified      PostgreSQL DDL schema and SQLAlchemy ORM models implemented; unique constraints, atomic safe query analytics counter upsert, transactional session management with rollback, SQLite test compatibility, and repository service integration verified by tests
-  Redis cache                             Verified      QueryCache layer implemented with deterministic query/suggestion key formats, TTL expiration, invalidation on document indexing, graceful degradation on Redis downtime, and full unit/e2e test coverage
-  React frontend                          Not started   
-  Admin dashboard                         Not started   
+  Module H: PostgreSQL persistence        Verified      PostgreSQL DDL schema and SQLAlchemy ORM models implemented; unique constraints, atomic safe query analytics counter upsert, transactional session management with rollback, SQLite test compatibility, and repository service integration verified by tests
+  Module H: Redis query cache             Verified      QueryCache layer implemented with deterministic query/suggestion key formats, TTL expiration, invalidation on document indexing, graceful degradation on Redis downtime, and full unit/e2e test coverage
+  Module I: React frontend                Verified      Vite + React UI implemented with Search Hero, autocomplete search bar, filters (BM25/TF-IDF, AND/OR), result cards with term highlighting & scores, pagination, document inspection modal, Admin dashboard (source management, crawler job launcher, search & cache analytics), and isolated API service layer; 15/15 Vitest tests passing
+  Admin dashboard                         Verified      Integrated within React Frontend (Module I) with API key authorization, domain allowlist management, controlled crawl job trigger with status/errors, and search/cache metrics dashboard
   Testing and benchmarks                  Not started   
   Docker and deployment                   Not started   
 
