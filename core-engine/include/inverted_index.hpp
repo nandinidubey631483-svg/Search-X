@@ -130,6 +130,11 @@ public:
     void clear();
 
     /**
+     * @brief Direct read-only access to internal term dictionary.
+     */
+    const std::unordered_map<std::string, std::vector<Posting>>& dictionary() const;
+
+    /**
      * @brief Persist the index segment to disk.
      */
     bool save(const std::string& filepath, std::string* error_msg = nullptr) const;

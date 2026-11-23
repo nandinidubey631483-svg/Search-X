@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.routes_admin import get_crawler_service
 from backend.app.api.routes_search import get_search_service
+from backend.app.cache.redis_cache import InMemoryCacheClient, QueryCache
 from backend.app.config import settings
 from backend.app.db.database import Database
 from backend.app.db.repository import DatabaseRepository
@@ -28,10 +29,13 @@ def client(tmp_path: Path):
     test_db.create_tables()
     test_repo = DatabaseRepository(db=test_db)
 
+    test_cache = QueryCache(client=InMemoryCacheClient())
+
     test_service = SearchEngineService(
         index_path=test_index,
         engine_bin=engine_bin,
         repository=test_repo,
+        cache=test_cache,
     )
     test_crawler = CrawlerService(
         search_service=test_service,

@@ -168,12 +168,20 @@ int main(int argc, char* argv[]) {
         std::string prefix_lower = prefix;
         std::transform(prefix_lower.begin(), prefix_lower.end(), prefix_lower.begin(), ::tolower);
 
-        // Scan vocabulary terms
-        for (const auto* postings : {index.get_postings(prefix_lower)}) {
-            if (postings) {
-                matches.push_back({prefix_lower, postings->size()});
+        // Scan vocabulary terms matching prefix
+        for (const auto& kv : index.dictionary()) {
+            const std::string& term = kv.first;
+            const auto& postings = kv.second;
+            if (term.rfind(prefix_lower, 0) == 0) {
+                matches.push_back({term, postings.size()});
             }
         }
+
+        // Sort by document frequency descending, then alphabetical
+        std::sort(matches.begin(), matches.end(), [](const TermMatch& a, const TermMatch& b) {
+            if (a.df != b.df) return a.df > b.df;
+            return a.term < b.term;
+        });
 
         // Output JSON array of suggestions
         std::cout << "[";

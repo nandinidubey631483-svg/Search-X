@@ -632,7 +632,7 @@ complete merely because files were generated.
   Python crawler/importer                 Verified      DocumentImporter and controlled Crawler implemented with SSRF DNS IP validation, redirect checks, domain allowlist, robots.txt, and depth/page limits; tests passing
   FastAPI backend                         Verified      FastAPI endpoints implemented (/api/search, /api/suggestions, /api/documents, /api/health, /api/admin/*) integrated with C++ engine binary; all tests passing
   PostgreSQL                              Verified      PostgreSQL DDL schema and SQLAlchemy ORM models implemented; unique constraints, atomic safe query analytics counter upsert, transactional session management with rollback, SQLite test compatibility, and repository service integration verified by tests
-  Redis cache                             Not started   
+  Redis cache                             Verified      QueryCache layer implemented with deterministic query/suggestion key formats, TTL expiration, invalidation on document indexing, graceful degradation on Redis downtime, and full unit/e2e test coverage
   React frontend                          Not started   
   Admin dashboard                         Not started   
   Testing and benchmarks                  Not started   

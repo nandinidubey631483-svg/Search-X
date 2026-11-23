@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from crawler.app.models import Document
 from crawler.app.text_processor import TextProcessor
 
+from ..cache.redis_cache import QueryCache, get_cache
 from ..config import settings
 from ..db.repository import DatabaseRepository
 from ..models.schemas import (
@@ -38,11 +39,13 @@ class SearchEngineService:
         engine_bin: Optional[Path] = None,
         text_processor: Optional[TextProcessor] = None,
         repository: Optional[DatabaseRepository] = None,
+        cache: Optional[QueryCache] = None,
     ) -> None:
         self.index_path = Path(index_path or settings.INDEX_PATH).resolve()
         self.engine_bin = Path(engine_bin or settings.ENGINE_BIN).resolve()
         self.text_processor = text_processor or TextProcessor()
         self.repository = repository or DatabaseRepository()
+        self.cache = cache or get_cache()
         self.total_searches = 0
         self.query_frequency: Dict[str, int] = collections.defaultdict(int)
 
@@ -121,6 +124,17 @@ class SearchEngineService:
                 results=[],
             )
 
+        # 1. Attempt cache lookup for repeated queries
+        cache_key = None
+        if self.cache and self.cache.enabled:
+            cache_key = self.cache.make_search_key(algo, mode, limit, offset, normalized_terms)
+            cached_data = self.cache.get_search(cache_key)
+            if cached_data is not None:
+                try:
+                    return SearchResponse(**cached_data)
+                except Exception:
+                    pass
+
         top_k = offset + limit
         args = ["search", str(self.index_path), algo, mode, str(top_k)] + normalized_terms
         raw_json = self._call_engine(args)
@@ -144,7 +158,7 @@ class SearchEngineService:
             for item in paginated
         ]
 
-        return SearchResponse(
+        response = SearchResponse(
             query=query,
             total_hits=total_hits,
             page=(offset // limit) + 1 if limit > 0 else 1,
@@ -153,16 +167,33 @@ class SearchEngineService:
             results=results,
         )
 
+        # 2. Store response in cache for subsequent requests
+        if cache_key and self.cache:
+            self.cache.set_search(cache_key, response.model_dump())
+
+        return response
+
     def get_suggestions(self, prefix: str, limit: int = 5) -> List[str]:
         """Fetch term suggestions starting with prefix from index vocabulary."""
         prefix_clean = prefix.strip().lower()
         if not prefix_clean or not self.index_path.exists():
             return []
 
+        # 1. Check cache
+        cache_key = None
+        if self.cache and self.cache.enabled:
+            cache_key = self.cache.make_suggest_key(prefix_clean, limit)
+            cached = self.cache.get_suggest(cache_key)
+            if cached is not None:
+                return cached
+
         args = ["suggestions", str(self.index_path), prefix_clean, str(limit)]
         try:
             raw = self._call_engine(args)
-            return json.loads(raw)
+            suggestions = json.loads(raw)
+            if cache_key and self.cache:
+                self.cache.set_suggest(cache_key, suggestions)
+            return suggestions
         except Exception:
             return []
 
@@ -260,6 +291,13 @@ class SearchEngineService:
                 except Exception as e:
                     logger.warning(f"Failed to persist indexed documents in DB: {e}")
 
+            # Invalidate query cache upon new indexing to prevent stale results
+            if self.cache:
+                try:
+                    self.cache.invalidate_search_cache()
+                except Exception as e:
+                    logger.warning(f"Failed to invalidate search cache: {e}")
+
             return indexed_count
         finally:
             try:
@@ -287,8 +325,11 @@ class SearchEngineService:
         if not top_queries:
             top_queries = dict(sorted(self.query_frequency.items(), key=lambda x: x[1], reverse=True)[:10])
 
+        cache_stats = self.cache.get_stats() if self.cache else None
+
         return AnalyticsResponse(
             total_searches=total_searches,
             top_queries=top_queries,
             index_stats=stats,
+            cache_stats=cache_stats,
         )

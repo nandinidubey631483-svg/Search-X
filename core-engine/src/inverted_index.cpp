@@ -268,4 +268,8 @@ void InvertedIndex::clear() {
     total_corpus_tokens_ = 0;
 }
 
+const std::unordered_map<std::string, std::vector<Posting>>& InvertedIndex::dictionary() const {
+    return dictionary_;
+}
+
 } // namespace searchx

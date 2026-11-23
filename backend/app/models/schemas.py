@@ -73,7 +73,15 @@ class CrawlJobResponse(BaseModel):
     errors: Dict[str, str] = Field(default_factory=dict)
 
 
+class CacheStats(BaseModel):
+    hits: int = 0
+    misses: int = 0
+    hit_ratio: float = 0.0
+    enabled: bool = True
+
+
 class AnalyticsResponse(BaseModel):
     total_searches: int
     top_queries: Dict[str, int]
     index_stats: IndexStats
+    cache_stats: Optional[CacheStats] = None
