@@ -38,7 +38,7 @@ std::string unescape_str(const std::string& in) {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: searchx_engine <stats|document|search|index|suggestions> [args...]" << std::endl;
+        std::cerr << "Usage: searchx_engine <stats|document|search|index|suggestions|vocab> [args...]" << std::endl;
         return 1;
     }
 
@@ -136,6 +136,32 @@ int main(int argc, char* argv[]) {
                << "}";
         }
         ss << "]";
+        std::cout << ss.str() << std::endl;
+        return 0;
+    }
+
+    if (command == "vocab") {
+        if (argc < 3) {
+            std::cout << "{}" << std::endl;
+            return 0;
+        }
+        std::string index_path = argv[2];
+        InvertedIndex index;
+        std::string err;
+        if (!index.load(index_path, &err)) {
+            std::cout << "{}" << std::endl;
+            return 0;
+        }
+
+        std::stringstream ss;
+        ss << "{";
+        bool first = true;
+        for (const auto& kv : index.dictionary()) {
+            if (!first) ss << ",";
+            first = false;
+            ss << "\"" << Document::escape_json(kv.first) << "\":" << kv.second.size();
+        }
+        ss << "}";
         std::cout << ss.str() << std::endl;
         return 0;
     }

@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from crawler.app.models import Document
 from crawler.app.text_processor import TextProcessor
 
+from .spell_checker import SpellChecker
 from ..cache.redis_cache import QueryCache, get_cache
 from ..config import settings
 from ..db.repository import DatabaseRepository
@@ -46,6 +47,8 @@ class SearchEngineService:
         self.text_processor = text_processor or TextProcessor()
         self.repository = repository or DatabaseRepository()
         self.cache = cache or get_cache()
+        self.spell_checker = SpellChecker()
+        self._vocab_cache: Optional[Dict[str, int]] = None
         self.total_searches = 0
         self.query_frequency: Dict[str, int] = collections.defaultdict(int)
 
@@ -93,6 +96,25 @@ class SearchEngineService:
         prefix = "..." if start > 0 else ""
         suffix = "..." if end < len(content) else ""
         return f"{prefix}{content[start:end].strip()}{suffix}"
+
+    def get_vocabulary_frequencies(self) -> Dict[str, int]:
+        """Fetch term -> document frequency dictionary from C++ index, cached in memory."""
+        if self._vocab_cache is not None:
+            return self._vocab_cache
+
+        if not self.index_path.exists():
+            return {}
+
+        try:
+            raw = self._call_engine(["vocab", str(self.index_path)])
+            data = json.loads(raw)
+            if isinstance(data, dict):
+                self._vocab_cache = {str(k).lower(): int(v) for k, v in data.items()}
+                return self._vocab_cache
+        except Exception as e:
+            logger.warning(f"Failed to fetch vocabulary from core engine: {e}")
+
+        return {}
 
     def search(
         self,
@@ -158,6 +180,37 @@ class SearchEngineService:
             for item in paginated
         ]
 
+        # 2. Check for spell correction / "Did you mean"
+        vocab = self.get_vocabulary_frequencies()
+        correction = self.spell_checker.check_query(query, vocab)
+        did_you_mean = correction.corrected_query if correction.has_correction else None
+        is_auto_corrected = False
+
+        # If zero hits and a valid correction exists, automatically fallback to corrected query
+        if total_hits == 0 and correction.has_correction:
+            fallback_terms = self.text_processor.tokenize_query(correction.corrected_query)
+            if fallback_terms:
+                fb_args = ["search", str(self.index_path), algo, mode, str(top_k)] + fallback_terms
+                try:
+                    fb_raw = self._call_engine(fb_args)
+                    fb_items = json.loads(fb_raw)
+                    if fb_items:
+                        total_hits = len(fb_items)
+                        paginated = fb_items[offset : offset + limit]
+                        results = [
+                            SearchResultItem(
+                                document_id=item.get("document_id", ""),
+                                title=item.get("title", ""),
+                                url=item.get("url", ""),
+                                snippet=self.generate_snippet(item.get("content", ""), fallback_terms),
+                                score=round(float(item.get("score", 0.0)), 4),
+                            )
+                            for item in paginated
+                        ]
+                        is_auto_corrected = True
+                except Exception as e:
+                    logger.warning(f"Fallback spell search failed: {e}")
+
         response = SearchResponse(
             query=query,
             total_hits=total_hits,
@@ -165,6 +218,8 @@ class SearchEngineService:
             limit=limit,
             algorithm=algo,
             results=results,
+            did_you_mean=did_you_mean,
+            is_auto_corrected=is_auto_corrected,
         )
 
         # 2. Store response in cache for subsequent requests
@@ -292,6 +347,7 @@ class SearchEngineService:
                     logger.warning(f"Failed to persist indexed documents in DB: {e}")
 
             # Invalidate query cache upon new indexing to prevent stale results
+            self._vocab_cache = None
             if self.cache:
                 try:
                     self.cache.invalidate_search_cache()

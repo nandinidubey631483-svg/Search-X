@@ -18,6 +18,8 @@ class SearchResponse(BaseModel):
     limit: int
     algorithm: str
     results: List[SearchResultItem]
+    did_you_mean: Optional[str] = None
+    is_auto_corrected: bool = False
 
 
 class SuggestionResponse(BaseModel):

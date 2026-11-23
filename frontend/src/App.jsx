@@ -20,6 +20,7 @@ import {
   IconNewspaper,
   IconGraduationCap,
   IconExternalLink,
+  IconSparkles,
 } from './components/Icons';
 import './index.css';
 
@@ -1023,6 +1024,49 @@ export function App() {
                     </span>
                   </div>
                 </div>
+
+                {/* Did You Mean / Spell Correction Banner */}
+                {searchResponse.did_you_mean && (
+                  <div
+                    className={`spell-correction-banner ${searchResponse.is_auto_corrected ? 'auto-corrected' : 'suggestion'}`}
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    <IconSparkles size={16} className="spell-icon" />
+                    {searchResponse.is_auto_corrected ? (
+                      <span>
+                        Showing results for{' '}
+                        <button
+                          type="button"
+                          className="spell-link primary"
+                          onClick={() => executeSearch(searchResponse.did_you_mean, 1)}
+                        >
+                          <strong>{searchResponse.did_you_mean}</strong>
+                        </button>
+                        . Search instead for{' '}
+                        <button
+                          type="button"
+                          className="spell-link secondary"
+                          onClick={() => executeSearch(searchResponse.query, 1)}
+                        >
+                          <em>{searchResponse.query}</em>
+                        </button>
+                      </span>
+                    ) : (
+                      <span>
+                        Did you mean:{' '}
+                        <button
+                          type="button"
+                          className="spell-link primary"
+                          onClick={() => executeSearch(searchResponse.did_you_mean, 1)}
+                        >
+                          <strong>{searchResponse.did_you_mean}</strong>
+                        </button>
+                        ?
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Sub-bar Category Switcher for Live Results */}
                 <div className="results-category-tabs" role="tablist" aria-label="Search Result Categories">

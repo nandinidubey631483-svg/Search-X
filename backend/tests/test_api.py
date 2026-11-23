@@ -180,3 +180,13 @@ def test_admin_sources_and_analytics(client: TestClient):
     assert analytics["total_searches"] >= 1
     assert "inverted" in analytics["top_queries"]
     assert analytics["index_stats"]["total_documents"] == 2
+
+
+def test_search_spell_correction(client: TestClient):
+    # Query with typo "invertd indx" -> should trigger did_you_mean and fallback search
+    resp = client.get("/api/search?q=invertd indx")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["did_you_mean"] == "inverted index"
+    assert data["is_auto_corrected"] is True
+    assert data["total_hits"] >= 1

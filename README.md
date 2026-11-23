@@ -184,6 +184,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## Search Features & Capabilities
 
 - **BM25 & TF-IDF Relevance:** Configurable ranking model with length normalization and smooth inverse document frequency.
+- **Typo-Tolerance & "Did You Mean?" Engine:** Damerau-Levenshtein edit-distance ($\le 2$) with corpus document frequency weighting, automatic zero-hit fallback search, and interactive suggestion banners.
 - **Boolean Precision:** Supports strict `AND` intersection for exact matching or `OR` union for high recall.
 - **Positional Snippet Extraction:** Dynamically extracts the most relevant text excerpt highlighting queried terms.
 - **Category Navigation Directory:** Explore indexed resources across **Web**, **Images**, **Documents**, **News**, and **Scholar**.
@@ -201,10 +202,10 @@ SearchX enforces comprehensive test coverage across every component:
 # 1. Run C++ Engine Unit Tests (Document, Inverted Index, BM25/TF-IDF, Binary Serialization)
 ctest --test-dir core-engine/build --output-on-failure
 
-# 2. Run Python Backend & Crawler Tests (57 test cases)
+# 2. Run Python Backend & Crawler Tests (65 test cases)
 pytest backend/tests crawler/tests -v
 
-# 3. Run React Frontend Unit Tests (15 test suites)
+# 3. Run React Frontend Unit Tests (16 test suites)
 npm --prefix frontend test
 
 # 4. Verify Frontend Production Build

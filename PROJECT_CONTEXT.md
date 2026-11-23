@@ -556,6 +556,11 @@ adjustment.
   13                      CI/CD and Security      Multi-platform GitHub Actions
                           Analysis                workflows for C++, Python,
                                                   React, Docker, and CodeQL
+
+  14                      Query Spell Correction  Damerau-Levenshtein distance &
+                          & Typo-Tolerance        document frequency tie-breaking
+                                                  over C++ index vocabulary;
+                                                  auto-fallback & UI banner
   -----------------------------------------------------------------------
 
 **Important:** Do not begin with the React UI. Prove that the core
@@ -642,6 +647,7 @@ complete merely because files were generated.
   Testing and benchmarks                  Verified      Comprehensive testing suite (4 CTest suites, 57 pytest suites, 15 Vitest suites, e2e integration test) and benchmark harness (docs/BENCHMARKS.md) measuring indexing throughput (553 docs/sec), query latency percentiles, and cache speedup (8.7x); all verified
   Docker and deployment                   Verified      Multi-stage Dockerfiles for backend (Debian C++ CMake builder + Python 3.12 runtime) and frontend (Node Vite build + Nginx Alpine reverse proxy & SPA router); docker-compose.yml orchestrating PostgreSQL 16, Redis 7, FastAPI backend, and Nginx frontend with healthchecks, non-root security user, and persistent volumes; .env.example configuration template; verified
   CI/CD and security analysis             Verified      Cross-platform GitHub Actions (.github/workflows/ci.yml) matrix for C++ (Linux & Windows), Python (3.11 & 3.12), React (Vitest & Vite build), and Docker multi-stage images; automated CodeQL semantic security analysis (.github/workflows/codeql.yml) for C++, Python, and JS
+  Query spell correction & typo tolerance Verified      Vocabulary-weighted Damerau-Levenshtein spell checker (backend/app/services/spell_checker.py), C++ index vocabulary extraction CLI subcommand (vocab), automatic fallback retrieval on 0 hits, interactive 'Did you mean' React banner, and unit/integration tests; all 65 Pytest & 16 Vitest tests passing
 
 Allowed statuses: `Not started`, `In progress`, `Implemented`,
 `Verified`, `Blocked`.

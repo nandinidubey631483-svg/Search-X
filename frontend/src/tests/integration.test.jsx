@@ -87,6 +87,46 @@ describe('SearchX App Flow Integration', () => {
       expect(screen.getByText(/no matching documents found/i)).toBeInTheDocument();
     });
   });
+
+  it('renders Did You Mean spell correction banner and handles click', async () => {
+    vi.spyOn(api, 'checkHealth').mockResolvedValue({ status: 'ok', index_stats: {} });
+    const searchSpy = vi.spyOn(api, 'search').mockResolvedValue({
+      query: 'pythn',
+      total_hits: 1,
+      page: 1,
+      limit: 10,
+      algorithm: 'bm25',
+      did_you_mean: 'python',
+      is_auto_corrected: false,
+      results: [
+        {
+          document_id: 'doc_1',
+          title: 'Python Language Documentation',
+          url: 'https://docs.python.org',
+          snippet: 'Python is a high-level programming language.',
+          score: 1.5,
+        },
+      ],
+    });
+
+    render(<App />);
+
+    const searchInput = screen.getByPlaceholderText(/search/i);
+    fireEvent.change(searchInput, { target: { value: 'pythn' } });
+    fireEvent.submit(searchInput.closest('form'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/did you mean/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'python' })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'python' }));
+    await waitFor(() => {
+      expect(searchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'python' })
+      );
+    });
+  });
 });
 
 describe('AdminDashboard Component', () => {
