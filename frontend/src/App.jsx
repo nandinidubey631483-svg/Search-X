@@ -712,7 +712,7 @@ export function App() {
 
               {/* Dynamic Showcase based on activeCategory */}
               {!searchResponse && (
-                <div className="category-showcase-section">
+                <div key={activeCategory} className="category-showcase-section animate-slide-fade">
                   {/* Common Category Verified Websites Directory */}
                   <div className="category-view-box">
                     <div className="category-sources-section">
@@ -993,7 +993,10 @@ export function App() {
 
             {/* Search Results Display */}
             {!loading && searchResponse && (
-              <section className="search-results-section">
+              <section
+                key={`${searchResponse.query}-${searchResponse.page}-${activeCategory}`}
+                className="search-results-section animate-slide-fade"
+              >
                 {/* Result Meta Bar */}
                 <div className="results-meta-bar">
                   <div className="meta-bar-left">
