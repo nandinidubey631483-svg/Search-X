@@ -17,6 +17,7 @@ from crawler.app.models import Document
 from crawler.app.text_processor import TextProcessor
 
 from ..config import settings
+from ..db.repository import DatabaseRepository
 from ..models.schemas import (
     AnalyticsResponse,
     DocumentResponse,
@@ -36,10 +37,12 @@ class SearchEngineService:
         index_path: Optional[Path] = None,
         engine_bin: Optional[Path] = None,
         text_processor: Optional[TextProcessor] = None,
+        repository: Optional[DatabaseRepository] = None,
     ) -> None:
         self.index_path = Path(index_path or settings.INDEX_PATH).resolve()
         self.engine_bin = Path(engine_bin or settings.ENGINE_BIN).resolve()
         self.text_processor = text_processor or TextProcessor()
+        self.repository = repository or DatabaseRepository()
         self.total_searches = 0
         self.query_frequency: Dict[str, int] = collections.defaultdict(int)
 
@@ -102,6 +105,11 @@ class SearchEngineService:
         clean_query = " ".join(normalized_terms)
         if clean_query:
             self.query_frequency[clean_query] += 1
+            if self.repository:
+                try:
+                    self.repository.record_query(clean_query)
+                except Exception as e:
+                    logger.warning(f"Failed to record query in DB: {e}")
 
         if not normalized_terms or not self.index_path.exists():
             return SearchResponse(
@@ -160,27 +168,41 @@ class SearchEngineService:
 
     def get_document(self, doc_id: str) -> Optional[DocumentResponse]:
         """Retrieve document metadata by string document ID."""
-        if not self.index_path.exists():
-            return None
+        if self.index_path.exists():
+            args = ["document", str(self.index_path), doc_id]
+            try:
+                raw = self._call_engine(args)
+                data = json.loads(raw)
+                if "error" not in data:
+                    return DocumentResponse(
+                        document_id=data.get("document_id", ""),
+                        title=data.get("title", ""),
+                        source_url=data.get("source_url", ""),
+                        content=data.get("content", ""),
+                        description=data.get("description", ""),
+                        language=data.get("language", "en"),
+                        fetched_at=data.get("fetched_at", ""),
+                        status=data.get("status", "ingested"),
+                    )
+            except Exception:
+                pass
 
-        args = ["document", str(self.index_path), doc_id]
-        try:
-            raw = self._call_engine(args)
-            data = json.loads(raw)
-            if "error" in data:
-                return None
-            return DocumentResponse(
-                document_id=data.get("document_id", ""),
-                title=data.get("title", ""),
-                source_url=data.get("source_url", ""),
-                content=data.get("content", ""),
-                description=data.get("description", ""),
-                language=data.get("language", "en"),
-                fetched_at=data.get("fetched_at", ""),
-                status=data.get("status", "ingested"),
-            )
-        except Exception:
-            return None
+        # Fallback to persistent database
+        if self.repository:
+            doc_db = self.repository.get_document(doc_id)
+            if doc_db:
+                return DocumentResponse(
+                    document_id=doc_db.document_id,
+                    title=doc_db.title,
+                    source_url=doc_db.source_url,
+                    content=doc_db.content,
+                    description=doc_db.description or "",
+                    language=doc_db.language or "en",
+                    fetched_at=doc_db.fetched_at or "",
+                    status=doc_db.status or "ingested",
+                )
+
+        return None
 
     def get_stats(self) -> IndexStats:
         """Fetch index statistics from C++ core engine."""
@@ -229,7 +251,16 @@ class SearchEngineService:
             args = ["index", str(self.index_path), payload_path]
             raw = self._call_engine(args)
             data = json.loads(raw)
-            return data.get("indexed_count", 0)
+            indexed_count = data.get("indexed_count", 0)
+
+            # Persist documents into database
+            if self.repository:
+                try:
+                    self.repository.save_documents(documents)
+                except Exception as e:
+                    logger.warning(f"Failed to persist indexed documents in DB: {e}")
+
+            return indexed_count
         finally:
             try:
                 Path(payload_path).unlink(missing_ok=True)
@@ -239,10 +270,25 @@ class SearchEngineService:
     def get_analytics(self) -> AnalyticsResponse:
         """Return search engine usage and index analytics."""
         stats = self.get_stats()
-        # Top 10 most frequent queries
-        sorted_queries = dict(sorted(self.query_frequency.items(), key=lambda x: x[1], reverse=True)[:10])
+        
+        # Use repository query analytics if available
+        top_queries = {}
+        total_searches = self.total_searches
+        if self.repository:
+            try:
+                db_top = self.repository.get_top_queries(10)
+                db_total = self.repository.total_queries_count()
+                if db_top or db_total > 0:
+                    top_queries = db_top
+                    total_searches = max(self.total_searches, db_total)
+            except Exception as e:
+                logger.warning(f"Failed to retrieve analytics from DB: {e}")
+
+        if not top_queries:
+            top_queries = dict(sorted(self.query_frequency.items(), key=lambda x: x[1], reverse=True)[:10])
+
         return AnalyticsResponse(
-            total_searches=self.total_searches,
-            top_queries=sorted_queries,
+            total_searches=total_searches,
+            top_queries=top_queries,
             index_stats=stats,
         )

@@ -6,20 +6,37 @@ import pytest
 from pathlib import Path
 from fastapi.testclient import TestClient
 
-from backend.app.config import settings
-from backend.app.main import app
+from backend.app.api.routes_admin import get_crawler_service
 from backend.app.api.routes_search import get_search_service
+from backend.app.config import settings
+from backend.app.db.database import Database
+from backend.app.db.repository import DatabaseRepository
+from backend.app.main import app
+from backend.app.services.crawler_service import CrawlerService
 from backend.app.services.search_service import SearchEngineService
 from crawler.app.models import Document
 
 
 @pytest.fixture
 def client(tmp_path: Path):
-    """Test client with isolated temporary index path."""
+    """Test client with isolated temporary index and database path."""
     test_index = tmp_path / "test_api_index.bin"
     engine_bin = Path("core-engine/build/searchx_engine.exe").resolve()
 
-    test_service = SearchEngineService(index_path=test_index, engine_bin=engine_bin)
+    test_db_file = tmp_path / "test_api.db"
+    test_db = Database(f"sqlite:///{test_db_file.as_posix()}")
+    test_db.create_tables()
+    test_repo = DatabaseRepository(db=test_db)
+
+    test_service = SearchEngineService(
+        index_path=test_index,
+        engine_bin=engine_bin,
+        repository=test_repo,
+    )
+    test_crawler = CrawlerService(
+        search_service=test_service,
+        repository=test_repo,
+    )
 
     # Ingest a small test corpus into the C++ index
     doc1 = Document.create(
@@ -38,8 +55,9 @@ def client(tmp_path: Path):
     )
     test_service.index_documents([doc1, doc2])
 
-    # Override service dependency
+    # Override service dependencies
     app.dependency_overrides[get_search_service] = lambda: test_service
+    app.dependency_overrides[get_crawler_service] = lambda: test_crawler
 
     with TestClient(app) as test_client:
         yield test_client
