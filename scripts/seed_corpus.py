@@ -229,10 +229,10 @@ DOCUMENTS = [
     },
     {
         "document_id": "doc_postgresql_mvcc",
-        "title": "PostgreSQL Architecture: MVCC and ACID Relational Persistence",
+        "title": "PostgreSQL Architecture: Postgres MVCC and ACID Relational Persistence",
         "source_url": "https://www.postgresql.org/docs/current/mvcc.html",
         "content": (
-            "PostgreSQL maintains data consistency by using a Multi-Version Concurrency Control (MVCC) model. This means that each query sees a snapshot "
+            "PostgreSQL (often known as Postgres) maintains data consistency by using a Multi-Version Concurrency Control (MVCC) model. This means that each query sees a snapshot "
             "of data (a database version) as it was some time ago, regardless of the current state of the underlying data. Write-Ahead Logging (WAL) guarantees durability."
         ),
         "description": "Relational database reliability, transactions, and concurrency control.",
