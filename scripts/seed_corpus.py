@@ -115,6 +115,51 @@ DOCUMENTS = [
         ),
         "description": "Designing accessible, reactive search user experiences.",
     },
+    {
+        "document_id": "doc_machine_learning",
+        "title": "Machine Learning: Concepts, Methods, and Algorithms",
+        "source_url": "https://en.wikipedia.org/wiki/Machine_learning",
+        "content": (
+            "Machine learning is a field of inquiry devoted to understanding and building methods that 'learn' — that is, methods that "
+            "leverage data to improve performance on some set of tasks. It is seen as a part of artificial intelligence. Machine learning "
+            "algorithms build a model based on training data in order to make predictions or decisions without being explicitly programmed to do so. "
+            "Core paradigms include supervised learning, unsupervised learning, reinforcement learning, and modern neural network models."
+        ),
+        "description": "Foundations of machine learning, training data, predictive algorithms, and AI paradigms.",
+    },
+    {
+        "document_id": "doc_deep_learning",
+        "title": "Deep Learning and Artificial Neural Networks",
+        "source_url": "https://en.wikipedia.org/wiki/Deep_learning",
+        "content": (
+            "Deep learning is part of a broader family of machine learning methods based on artificial neural networks with representation learning. "
+            "Deep neural network architectures including convolutional neural networks, recurrent networks, and transformers have revolutionized "
+            "computer vision, natural language processing, speech recognition, and search engine ranking functions."
+        ),
+        "description": "Exploration of deep learning architectures, neural representations, and transformers.",
+    },
+    {
+        "document_id": "doc_nlp_embeddings",
+        "title": "Natural Language Processing and Dense Vector Search",
+        "source_url": "https://en.wikipedia.org/wiki/Natural_language_processing",
+        "content": (
+            "Natural language processing (NLP) enables computers to understand, interpret, and manipulate human language. "
+            "Modern search engines combine lexical inverted indexes with dense vector embeddings produced by machine learning models to perform "
+            "hybrid semantic search, capturing both exact keyword matches and conceptual synonyms."
+        ),
+        "description": "NLP techniques, text representations, and hybrid semantic retrieval.",
+    },
+    {
+        "document_id": "doc_ai_overview",
+        "title": "Artificial Intelligence: Past, Present, and Future",
+        "source_url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+        "content": (
+            "Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by animals and humans. "
+            "Major AI subfields include machine learning, deep learning, automated reasoning, robotics, computer vision, and cognitive computing. "
+            "Information retrieval systems increasingly integrate AI models for query reformulation, intent understanding, and neural ranking."
+        ),
+        "description": "Comprehensive survey of artificial intelligence subfields and neural search applications.",
+    },
 ]
 
 def main():
