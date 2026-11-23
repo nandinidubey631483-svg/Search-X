@@ -20,9 +20,9 @@ describe('SearchX App Flow Integration', () => {
 
     render(<App />);
 
-    expect(screen.getByText(/high-performance document search engine/i)).toBeInTheDocument();
+    expect(screen.getByText(/A Smarter Search Experience/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /inverted index/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /bm25/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /machine learning/i })).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText(/Core Online \(15 docs\)/i)).toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('SearchX App Flow Integration', () => {
 
     render(<App />);
 
-    const searchInput = screen.getByPlaceholderText(/search documents/i);
+    const searchInput = screen.getByPlaceholderText(/search/i);
     fireEvent.change(searchInput, { target: { value: 'inverted' } });
     fireEvent.submit(searchInput.closest('form'));
 
@@ -79,7 +79,7 @@ describe('SearchX App Flow Integration', () => {
 
     render(<App />);
 
-    const searchInput = screen.getByPlaceholderText(/search documents/i);
+    const searchInput = screen.getByPlaceholderText(/search/i);
     fireEvent.change(searchInput, { target: { value: 'nonexistent_term' } });
     fireEvent.submit(searchInput.closest('form'));
 

@@ -9,11 +9,14 @@ export function SearchBar({
   setAlgo,
   mode = 'any',
   setMode,
+  activeCategory = 'web',
+  onSelectCategory,
 }) {
   const [query, setQuery] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [voiceActive, setVoiceActive] = useState(false);
   const debounceRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -21,7 +24,7 @@ export function SearchBar({
     setQuery(initialQuery);
   }, [initialQuery]);
 
-  // Handle autocomplete suggestion fetching with 200ms debounce
+  // Handle autocomplete suggestion fetching with debounce
   useEffect(() => {
     if (!query.trim() || query.length < 2) {
       setSuggestions([]);
@@ -70,15 +73,49 @@ export function SearchBar({
     onSearch(suggestion);
   };
 
+  // Simple browser SpeechRecognition support if available
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice search is not supported in this browser. Please type your query.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setVoiceActive(true);
+    recognition.onend = () => setVoiceActive(false);
+    recognition.onerror = () => setVoiceActive(false);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      onSearch(transcript);
+    };
+
+    recognition.start();
+  };
+
+  const categories = [
+    { id: 'web', label: 'Web', icon: '🌐' },
+    { id: 'images', label: 'Images', icon: '🖼️' },
+    { id: 'documents', label: 'Documents', icon: '📄' },
+    { id: 'news', label: 'News', icon: '📰' },
+    { id: 'scholar', label: 'Scholar', icon: '🎓' },
+  ];
+
   return (
     <div className="search-bar-container" ref={containerRef}>
       <form onSubmit={handleSubmit} className="search-form" role="search">
         <div className="input-wrapper">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon-left">🔍</span>
+
           <input
             type="text"
             className="search-input"
-            placeholder="Search documents, topics, or terms..."
+            placeholder="Search the web with SearchX..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -86,13 +123,13 @@ export function SearchBar({
             }}
             onFocus={() => setShowSuggestions(true)}
             autoComplete="off"
-            aria-label="Search documents"
+            aria-label="Search the web with SearchX"
           />
 
           {query && (
             <button
               type="button"
-              className="clear-btn"
+              className="action-icon-btn clear-btn"
               onClick={() => {
                 setQuery('');
                 setSuggestions([]);
@@ -103,17 +140,48 @@ export function SearchBar({
             </button>
           )}
 
+          {/* Voice Search Button */}
           <button
             type="button"
-            className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
-            onClick={() => setShowFilters(!showFilters)}
-            title="Toggle retrieval algorithm and match mode"
+            className={`action-icon-btn ${voiceActive ? 'voice-pulse' : ''}`}
+            onClick={handleVoiceSearch}
+            title={voiceActive ? 'Listening...' : 'Voice Search'}
+            aria-label="Voice Search"
           >
-            ⚙️ Filters
+            🎙️
           </button>
 
-          <button type="submit" className="submit-btn" disabled={loading || !query.trim()}>
-            {loading ? <span className="spinner"></span> : 'Search'}
+          {/* Visual / Document Search Lens Button */}
+          <button
+            type="button"
+            className="action-icon-btn"
+            onClick={() => alert("Document and Visual Search: Select document from below or drag & drop text/JSON files into Admin Dashboard.")}
+            title="Visual / Document Lens"
+            aria-label="Document Lens"
+          >
+            📷
+          </button>
+
+          {/* Settings / Filters Toggle */}
+          <button
+            type="button"
+            className={`action-icon-btn filter-btn ${showFilters ? 'active' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+            title="Algorithm & Retrieval Filters"
+            aria-label="Retrieval Filters"
+          >
+            ⚙️
+          </button>
+
+          {/* Gradient Circular Submit Button matching the screenshot */}
+          <button
+            type="submit"
+            className="search-submit-circle"
+            disabled={loading || !query.trim()}
+            title="Search"
+            aria-label="Search"
+          >
+            {loading ? <span className="spinner-white"></span> : '🔍'}
           </button>
         </div>
 
@@ -153,7 +221,7 @@ export function SearchBar({
           </div>
 
           <div className="filter-group">
-            <label className="filter-label" htmlFor="mode-select">Query Match Mode:</label>
+            <label className="filter-label" htmlFor="mode-select">Match Mode:</label>
             <select
               id="mode-select"
               className="filter-select"
@@ -166,6 +234,21 @@ export function SearchBar({
           </div>
         </div>
       )}
+
+      {/* Category Tabs matching the screenshot (Web, Images, Documents, News, Scholar) */}
+      <div className="category-tabs-container">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            className={`category-pill ${activeCategory === cat.id ? 'active' : ''}`}
+            onClick={() => onSelectCategory && onSelectCategory(cat.id)}
+          >
+            <span className="category-icon">{cat.icon}</span>
+            <span className="category-label">{cat.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

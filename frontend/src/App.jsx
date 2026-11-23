@@ -10,6 +10,7 @@ import './index.css';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('search');
+  const [activeCategory, setActiveCategory] = useState('web');
   const [query, setQuery] = useState('');
   const [algo, setAlgo] = useState('bm25');
   const [mode, setMode] = useState('any');
@@ -21,6 +22,25 @@ export function App() {
   const [error, setError] = useState(null);
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [health, setHealth] = useState(null);
+
+  // Dark / Light Theme State
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('searchx_dark_mode') === 'true';
+  });
+
+  const toggleDarkMode = () => {
+    const nextMode = !darkMode;
+    setDarkMode(nextMode);
+    localStorage.setItem('searchx_dark_mode', String(nextMode));
+  };
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   // Check backend health on mount
   const checkHealth = useCallback(async () => {
@@ -67,7 +87,6 @@ export function App() {
     [algo, mode, pageSize]
   );
 
-  // Trigger re-search if algo or mode changes when a query is already active
   const handleAlgoChange = (newAlgo) => {
     setAlgo(newAlgo);
     if (query.trim()) {
@@ -87,14 +106,25 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const trendingTopics = [
+    { label: 'Generative AI', icon: '🔥', query: 'artificial intelligence generative' },
+    { label: 'System Design', icon: '📈', query: 'distributed system architecture' },
+    { label: 'Machine Learning', icon: '📈', query: 'machine learning' },
+    { label: 'DevOps', icon: '📈', query: 'docker deployment pipeline' },
+    { label: 'Inverted Index', icon: '📈', query: 'inverted index postings' },
+    { label: 'Cloud Computing', icon: '📈', query: 'cloud computing redis' },
+  ];
+
   const queryTerms = query ? query.toLowerCase().split(/\s+/).filter(Boolean) : [];
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout ${darkMode ? 'theme-dark' : 'theme-light'}`}>
       <Navbar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         health={health}
+        darkMode={darkMode}
+        onToggleDarkMode={toggleDarkMode}
       />
 
       <main className="main-content">
@@ -102,15 +132,23 @@ export function App() {
           <AdminDashboard onSourceAdded={checkHealth} />
         ) : (
           <div className="search-page-container">
-            {/* Search Header / Hero */}
+            {/* Search Hero */}
             <div className={`search-hero ${searchResponse ? 'has-results' : ''}`}>
               {!searchResponse && (
                 <div className="hero-branding">
-                  <h1 className="hero-title">
-                    Search<span className="brand-accent">X</span>
-                  </h1>
+                  {/* Glowing 3D X Emblem */}
+                  <div className="hero-3d-emblem">
+                    <div className="emblem-glow"></div>
+                    <span className="emblem-sparkle left">✦</span>
+                    <span className="emblem-x">✕</span>
+                    <span className="emblem-sparkle right">✦</span>
+                  </div>
+
+                  <h1 className="hero-title">Search<span className="brand-accent">X</span></h1>
                   <p className="hero-subtitle">
-                    High-performance document search engine powered by custom C++ retrieval core.
+                    <span className="divider-line"></span>
+                    A Smarter Search Experience
+                    <span className="divider-line"></span>
                   </p>
                 </div>
               )}
@@ -123,7 +161,33 @@ export function App() {
                 setAlgo={handleAlgoChange}
                 mode={mode}
                 setMode={handleModeChange}
+                activeCategory={activeCategory}
+                onSelectCategory={setActiveCategory}
               />
+
+              {/* Trending Searches Section matching user screenshot */}
+              {!searchResponse && (
+                <div className="trending-section">
+                  <div className="trending-header">
+                    <span className="trending-icon">📈</span>
+                    <span className="trending-title">Trending Searches</span>
+                  </div>
+
+                  <div className="trending-pills">
+                    {trendingTopics.map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        className="trending-pill"
+                        onClick={() => executeSearch(item.query, 1)}
+                      >
+                        <span className="pill-icon">{item.icon}</span>
+                        <span className="pill-text">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Error State */}
@@ -140,26 +204,6 @@ export function App() {
                 >
                   Retry
                 </button>
-              </div>
-            )}
-
-            {/* Initial / Empty State Before Query */}
-            {!loading && !searchResponse && !error && (
-              <div className="empty-prompt-card">
-                <h2>Explore the Ingested Corpus</h2>
-                <p>Try searching for core information-retrieval concepts or indexed topics:</p>
-                <div className="sample-queries">
-                  {['inverted index', 'bm25', 'tf-idf', 'retrieval', 'normalization'].map((term) => (
-                    <button
-                      key={term}
-                      type="button"
-                      className="sample-query-pill"
-                      onClick={() => executeSearch(term, 1)}
-                    >
-                      🔍 {term}
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
 
@@ -181,7 +225,8 @@ export function App() {
                     About <strong>{searchResponse.total_hits}</strong> results for{' '}
                     <em>"{searchResponse.query}"</em> (Algorithm:{' '}
                     <strong className="algo-tag">{searchResponse.algorithm.toUpperCase()}</strong>, Match:{' '}
-                    <strong>{mode.toUpperCase()}</strong>)
+                    <strong>{mode.toUpperCase()}</strong>, Category:{' '}
+                    <strong className="category-tag">{activeCategory.toUpperCase()}</strong>)
                   </span>
                 </div>
 

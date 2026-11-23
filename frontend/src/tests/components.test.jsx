@@ -19,11 +19,11 @@ describe('SearchBar Component', () => {
       />
     );
 
-    const input = screen.getByPlaceholderText(/search documents/i);
+    const input = screen.getByPlaceholderText(/search/i);
     fireEvent.change(input, { target: { value: 'information retrieval' } });
     expect(input.value).toBe('information retrieval');
 
-    const submitBtn = screen.getByRole('button', { name: /search/i });
+    const submitBtn = screen.getByRole('button', { name: /^search$/i });
     fireEvent.click(submitBtn);
 
     expect(handleSearch).toHaveBeenCalledTimes(1);
