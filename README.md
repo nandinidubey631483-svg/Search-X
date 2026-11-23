@@ -1,5 +1,13 @@
 # SearchX
 
+[![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-passing-brightgreen?logo=github-actions)](.github/workflows/ci.yml)
+[![CodeQL Security](https://img.shields.io/badge/CodeQL-passing-brightgreen?logo=github)](.github/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![C++](https://img.shields.io/badge/C%2B%2B-17-blue?logo=c%2B%2B)](core-engine/)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue?logo=python)](backend/)
+[![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](frontend/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker)](docker-compose.yml)
+
 SearchX is an educational, industry-inspired document search engine built to demonstrate core information-retrieval concepts from first principles: web crawling and document ingestion, text normalization, custom C++ inverted index construction, Boolean query retrieval, TF-IDF and BM25 relevance ranking, Redis caching, PostgreSQL persistence, and a modern, high-performance web interface.
 
 ---
@@ -202,6 +210,18 @@ npm --prefix frontend test
 # 4. Verify Frontend Production Build
 npm --prefix frontend run build
 ```
+
+---
+
+## Continuous Integration & Security Analysis
+
+SearchX includes a production multi-platform CI/CD and CodeQL security suite configured in [`.github/workflows/`](.github/workflows/):
+
+- **Cross-Platform C++ Matrix**: Compiles the C++17 core engine and runs CTest verification suites across both `ubuntu-latest` and `windows-latest`.
+- **Python Backend & Crawler Tests**: Runs 57 Pytest test cases across Python 3.11 and 3.12 on Linux & Windows environments.
+- **Frontend Verification**: Tests all 15 Vitest suites and compiles optimized production Vite assets.
+- **Docker Compose & Multi-Stage Image Builds**: Validates `docker compose config`, `backend/Dockerfile` multi-stage build, and `frontend/Dockerfile` Nginx bundle.
+- **CodeQL Security Scanning**: Automated semantic code analysis for C++, Python, and JavaScript detecting memory bugs, buffer overflows, and SSRF flaws.
 
 ---
 

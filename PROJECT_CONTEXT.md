@@ -552,6 +552,10 @@ adjustment.
 
   12                      Docker and final        Reproducible setup and
                           documentation           complete README
+
+  13                      CI/CD and Security      Multi-platform GitHub Actions
+                          Analysis                workflows for C++, Python,
+                                                  React, Docker, and CodeQL
   -----------------------------------------------------------------------
 
 **Important:** Do not begin with the React UI. Prove that the core
@@ -637,6 +641,7 @@ complete merely because files were generated.
   Admin dashboard                         Verified      Integrated within React Frontend (Module I) with API key authorization, domain allowlist management, controlled crawl job trigger with status/errors, and search/cache metrics dashboard
   Testing and benchmarks                  Verified      Comprehensive testing suite (4 CTest suites, 57 pytest suites, 15 Vitest suites, e2e integration test) and benchmark harness (docs/BENCHMARKS.md) measuring indexing throughput (553 docs/sec), query latency percentiles, and cache speedup (8.7x); all verified
   Docker and deployment                   Verified      Multi-stage Dockerfiles for backend (Debian C++ CMake builder + Python 3.12 runtime) and frontend (Node Vite build + Nginx Alpine reverse proxy & SPA router); docker-compose.yml orchestrating PostgreSQL 16, Redis 7, FastAPI backend, and Nginx frontend with healthchecks, non-root security user, and persistent volumes; .env.example configuration template; verified
+  CI/CD and security analysis             Verified      Cross-platform GitHub Actions (.github/workflows/ci.yml) matrix for C++ (Linux & Windows), Python (3.11 & 3.12), React (Vitest & Vite build), and Docker multi-stage images; automated CodeQL semantic security analysis (.github/workflows/codeql.yml) for C++, Python, and JS
 
 Allowed statuses: `Not started`, `In progress`, `Implemented`,
 `Verified`, `Blocked`.
