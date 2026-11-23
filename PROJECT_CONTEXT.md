@@ -625,9 +625,9 @@ complete merely because files were generated.
   Document model and ingestion contract   Verified      Canonical Document & Token models with SHA-256 deduplication and C++ struct consistency; tests passing
   Text processing                         Verified      HTML text extraction, Unicode NFKC normalization, positional tokenization, and query tokenizer; tests passing
   C++ inverted index                      Verified      InvertedIndex implemented with term dictionary, positional postings, duplicate rejection, Boolean AND/OR lookup, and corpus statistics; all CTest unit tests passing
-  Query processing                        Not started   
-  TF-IDF ranking                          Not started   
-  BM25 ranking                            Not started   
+  Query processing                        Verified      Boolean AND/OR query candidate retrieval implemented and verified in C++ Ranker
+  TF-IDF ranking                          Verified      Sublinear TF and smooth IDF formula verified against hand-calculated test corpus
+  BM25 ranking                            Verified      Okapi BM25 scoring with configurable k1, b parameters, length normalization, and deterministic tie-breaking verified
   Index persistence                       Not started   
   Python crawler/importer                 Not started   
   FastAPI backend                         Not started   

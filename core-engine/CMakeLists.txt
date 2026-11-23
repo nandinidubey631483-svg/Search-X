@@ -14,6 +14,7 @@ endif()
 # Core engine library
 add_library(searchx_core STATIC
     src/inverted_index.cpp
+    src/ranking.cpp
 )
 
 target_include_directories(searchx_core PUBLIC
@@ -32,3 +33,8 @@ add_test(NAME test_document COMMAND test_document)
 add_executable(test_inverted_index tests/test_inverted_index.cpp)
 target_link_libraries(test_inverted_index PRIVATE searchx_core)
 add_test(NAME test_inverted_index COMMAND test_inverted_index)
+
+# Retrieval and ranking unit tests (TF-IDF & BM25)
+add_executable(test_ranking tests/test_ranking.cpp)
+target_link_libraries(test_ranking PRIVATE searchx_core)
+add_test(NAME test_ranking COMMAND test_ranking)
