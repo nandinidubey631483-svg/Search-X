@@ -624,7 +624,7 @@ complete merely because files were generated.
   Project foundation                      Verified      Repository initialized on branch main, .gitignore, README.md, docs/decisions configured and verified
   Document model and ingestion contract   Verified      Canonical Document & Token models with SHA-256 deduplication and C++ struct consistency; tests passing
   Text processing                         Verified      HTML text extraction, Unicode NFKC normalization, positional tokenization, and query tokenizer; tests passing
-  C++ inverted index                      Not started   
+  C++ inverted index                      Verified      InvertedIndex implemented with term dictionary, positional postings, duplicate rejection, Boolean AND/OR lookup, and corpus statistics; all CTest unit tests passing
   Query processing                        Not started   
   TF-IDF ranking                          Not started   
   BM25 ranking                            Not started   
