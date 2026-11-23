@@ -17,21 +17,49 @@ from backend.app.db.database import get_database
 from backend.app.db.repository import DatabaseRepository
 
 ALLOWED_SOURCES = [
+    # Web & General Knowledge
     "docs.python.org",
     "developer.mozilla.org",
     "en.wikipedia.org",
+    "github.com",
+    "stackoverflow.com",
+    "reddit.com",
     "react.dev",
     "doc.rust-lang.org",
-    "redis.io",
-    "postgresql.org",
-    "kubernetes.io",
-    "fastapi.tiangolo.com",
-    "docs.docker.com",
-    "pytorch.org",
-    "arxiv.org",
-    "github.com",
     "en.cppreference.com",
+    "fastapi.tiangolo.com",
+    # Images & Visual Media
+    "unsplash.com",
+    "pexels.com",
+    "pixabay.com",
+    "commons.wikimedia.org",
+    "openverse.org",
+    "svgrepo.com",
+    # Documents & Technical Manuals
+    "rfc-editor.org",
+    "w3.org",
+    "devdocs.io",
+    "readthedocs.org",
+    "kernel.org",
+    "postgresql.org",
+    "redis.io",
+    "kubernetes.io",
+    "docs.docker.com",
+    # News & Tech Publications
+    "news.ycombinator.com",
+    "techcrunch.com",
+    "theverge.com",
+    "arstechnica.com",
+    "bleepingcomputer.com",
+    "infoq.com",
+    # Scholar & Academic Research
+    "arxiv.org",
+    "scholar.google.com",
+    "semanticscholar.org",
+    "dl.acm.org",
+    "ieeexplore.ieee.org",
     "stanford.edu",
+    "pytorch.org",
 ]
 
 DOCUMENTS = [
@@ -394,6 +422,224 @@ DOCUMENTS = [
             "and optimized STL container performance essential for high-throughput search engines."
         ),
         "description": "Modern C++ features and standard library utilities for high-performance systems.",
+    },
+
+    # 11. Images & Visual Media (unsplash.com, pexels.com, pixabay.com, commons.wikimedia.org, openverse.org, svgrepo.com)
+    {
+        "document_id": "doc_unsplash_photography",
+        "title": "Unsplash: High-Resolution Photography, Stock Imagery and Visual Media",
+        "source_url": "https://unsplash.com/",
+        "content": (
+            "Unsplash provides over 5 million free high-resolution images, creative photography, and aesthetic wallpapers contributed by global photographers. "
+            "SearchX indexes visual metadata, resolution dimensions, color palettes, and descriptive tags for graphic designers and developers seeking visual creative commons assets."
+        ),
+        "description": "High-resolution stock photography and visual assets repository on Unsplash.",
+    },
+    {
+        "document_id": "doc_pexels_stock",
+        "title": "Pexels: Free Stock Photos, Royalty-Free Wallpapers and Creative Media",
+        "source_url": "https://www.pexels.com/",
+        "content": (
+            "Pexels offers free stock photos, royalty-free wallpapers, and visual design assets. Creative professionals use Pexels for desktop backgrounds, "
+            "UI mockups, and responsive web backgrounds with zero attribution required under the permissive Pexels license."
+        ),
+        "description": "Royalty-free photo collection and desktop wallpaper search on Pexels.",
+    },
+    {
+        "document_id": "doc_pixabay_vectors",
+        "title": "Pixabay: Free Vector Graphics, Illustrations and High-Def Media",
+        "source_url": "https://pixabay.com/",
+        "content": (
+            "Pixabay is a vibrant community of creatives sharing copyright-free images, vector graphics, animations, and illustrations. "
+            "All media are released under the Pixabay license, safe for commercial use without attribution, spanning vector icons, clip art, and photo galleries."
+        ),
+        "description": "Vector illustrations and copyright-free media catalog on Pixabay.",
+    },
+    {
+        "document_id": "doc_wikimedia_commons",
+        "title": "Wikimedia Commons: Educational Media, Scientific Schematics and Historical Images",
+        "source_url": "https://commons.wikimedia.org/",
+        "content": (
+            "Wikimedia Commons is a database of 100+ million freely usable media files. It hosts scientific diagrams, public domain anatomical charts, "
+            "geographic maps, and architectural photographs used across Wikipedia, research papers, and educational textbooks."
+        ),
+        "description": "Free educational media and scientific diagram archive on Wikimedia Commons.",
+    },
+    {
+        "document_id": "doc_openverse_media",
+        "title": "Openverse: Openly Licensed Media Search and Creative Commons Discovery",
+        "source_url": "https://openverse.org/",
+        "content": (
+            "Openverse is an open-source search engine for openly licensed and public domain images, audio, and visual works. "
+            "Openverse searches across more than 700 million creative works indexed from cultural institutions, museums, and digital libraries worldwide."
+        ),
+        "description": "Universal Creative Commons media search engine powered by WordPress.",
+    },
+    {
+        "document_id": "doc_svgrepo_vectors",
+        "title": "SVG Repo: Free Vector SVG Icons, UI Graphics and Scalable Schematics",
+        "source_url": "https://www.svgrepo.com/",
+        "content": (
+            "SVG Repo provides over 500,000 free SVG vectors, interface icons, and UI visual schematics. Scalable vector graphics allow loss-less rendering "
+            "across high-DPI displays, making SVG the industry standard for modern web application icons, flowchart diagrams, and technical blueprints."
+        ),
+        "description": "Scalable vector graphics and interface icon repository on SVG Repo.",
+    },
+
+    # 12. Documents & Official Specifications (rfc-editor.org, w3.org, devdocs.io, kernel.org, readthedocs.org)
+    {
+        "document_id": "doc_rfc_http3_quic",
+        "title": "RFC 9114: HTTP/3 Protocol and QUIC Transport Specifications",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9114.html",
+        "content": (
+            "RFC 9114 specifies HTTP/3, the third major version of the Hypertext Transfer Protocol. HTTP/3 maps HTTP semantics over QUIC, "
+            "an encrypted UDP-based transport protocol that eliminates head-of-line blocking, accelerates connection handshakes with 0-RTT, and boosts mobile performance."
+        ),
+        "description": "Official IETF Internet Standards documentation for HTTP/3 and QUIC transport.",
+    },
+    {
+        "document_id": "doc_w3c_html5_spec",
+        "title": "W3C Recommendation: HTML5 Semantic Elements and Web Architecture",
+        "source_url": "https://www.w3.org/TR/html52/",
+        "content": (
+            "The W3C HTML5 specification defines the fifth major version of the core language of the World Wide Web. It standardizes semantic markup elements "
+            "like article, section, nav, and main, alongside native video/audio playback, canvas 2D graphics, WebSockets, and offline web application caching."
+        ),
+        "description": "W3C standard recommendation for modern web document semantics and DOM APIs.",
+    },
+    {
+        "document_id": "doc_devdocs_reference",
+        "title": "DevDocs: Unified Fast Offline API Documentation for Developers",
+        "source_url": "https://devdocs.io/",
+        "content": (
+            "DevDocs combines multiple API documentations in a fast, organized, and searchable interface. It provides instant offline documentation for C++, "
+            "Python, JavaScript, CSS, HTML, Go, Rust, and PostgreSQL with keyboard shortcuts, fuzzy search, and clean developer typography."
+        ),
+        "description": "Comprehensive multi-language developer API documentation browser on DevDocs.",
+    },
+    {
+        "document_id": "doc_kernel_memory_management",
+        "title": "The Linux Kernel Documentation: Virtual Memory and Page Allocation",
+        "source_url": "https://www.kernel.org/doc/html/latest/admin-guide/mm/index.html",
+        "content": (
+            "The Linux kernel virtual memory subsystem manages physical RAM allocation, swap space, and memory mapping. Key concepts include page cache management, "
+            "slab allocators (SLUB/SLAB), transparent huge pages (THP), and out-of-memory (OOM) killer heuristics in high-concurrency server environments."
+        ),
+        "description": "Linux kernel architecture and memory management documentation from kernel.org.",
+    },
+    {
+        "document_id": "doc_readthedocs_platform",
+        "title": "Read the Docs: Open Source Technical Documentation Platform",
+        "source_url": "https://readthedocs.org/",
+        "content": (
+            "Read the Docs simplifies software documentation by automating building, versioning, and hosting of technical docs. Supporting Sphinx, MkDocs, "
+            "and Markdown, it generates searchable PDF and HTML manuals for thousands of open-source libraries and scientific software projects."
+        ),
+        "description": "Continuous documentation hosting and versioning system on Read the Docs.",
+    },
+
+    # 13. News & Tech Journalism (news.ycombinator.com, techcrunch.com, theverge.com, arstechnica.com, bleepingcomputer.com, infoq.com)
+    {
+        "document_id": "doc_hackernews_engineering",
+        "title": "Hacker News: Software Engineering Discussions and Architecture Insights",
+        "source_url": "https://news.ycombinator.com/",
+        "content": (
+            "Hacker News is a social news website focusing on computer science, entrepreneurship, and software engineering. It features real-time breaking discussions "
+            "on new compiler releases, system performance benchmarks, database architectures, and security advisories curated by the global tech community."
+        ),
+        "description": "Real-time engineering discussions and startup news portal on Hacker News.",
+    },
+    {
+        "document_id": "doc_techcrunch_ai_funding",
+        "title": "TechCrunch: AI Industry Headlines, Cloud Infrastructure and Tech Funding",
+        "source_url": "https://techcrunch.com/",
+        "content": (
+            "TechCrunch delivers breaking news and analysis on technology companies, artificial intelligence advancements, and venture capital funding rounds. "
+            "Coverage includes foundational model developments, enterprise SaaS acquisitions, and emerging developer tooling."
+        ),
+        "description": "Global technology industry journalism and artificial intelligence coverage on TechCrunch.",
+    },
+    {
+        "document_id": "doc_theverge_tech_culture",
+        "title": "The Verge: Emerging Technologies, Consumer Electronics and Digital Culture",
+        "source_url": "https://www.theverge.com/",
+        "content": (
+            "The Verge covers the intersection of technology, science, art, and modern culture. Reporting highlights consumer hardware reviews, semiconductor innovations, "
+            "browser platform wars, and regulatory antitrust developments shaping the open internet."
+        ),
+        "description": "In-depth technology journalism, platform reviews, and hardware reporting on The Verge.",
+    },
+    {
+        "document_id": "doc_arstechnica_security",
+        "title": "Ars Technica: In-Depth Technology Analysis, Linux Systems and Cybersecurity",
+        "source_url": "https://arstechnica.com/",
+        "content": (
+            "Ars Technica publishes authoritative technical reporting for technologists and IT professionals. Articles explore Linux kernel releases, "
+            "microarchitecture side-channel vulnerabilities, cryptographic algorithms, distributed systems resiliency, and broadband policy."
+        ),
+        "description": "Deep-dive technological analysis and cybersecurity reporting on Ars Technica.",
+    },
+    {
+        "document_id": "doc_bleepingcomputer_threats",
+        "title": "BleepingComputer: Cybersecurity Alerts, Zero-Day Vulnerabilities and CVE Reports",
+        "source_url": "https://www.bleepingcomputer.com/",
+        "content": (
+            "BleepingComputer is a premier cybersecurity news site providing timely threat intelligence on ransomware campaigns, zero-day software exploits, "
+            "CVE security patches, and data breach disclosures affecting cloud infrastructure and enterprise networks."
+        ),
+        "description": "Cybersecurity vulnerability reporting and malware threat intelligence on BleepingComputer.",
+    },
+    {
+        "document_id": "doc_infoq_architecture",
+        "title": "InfoQ: Software Architecture Trends, Microservices and DevOps Practices",
+        "source_url": "https://www.infoq.com/",
+        "content": (
+            "InfoQ provides enterprise software developers with peer-driven news on software architecture, DevOps pipelines, containerized deployments, "
+            "and microservices patterns. It covers language roadmaps, cloud native computing, and reactive systems design."
+        ),
+        "description": "Enterprise software architecture and distributed systems news on InfoQ.",
+    },
+
+    # 14. Scholar & Academic Citations (scholar.google.com, semanticscholar.org, dl.acm.org, ieeexplore.ieee.org)
+    {
+        "document_id": "doc_google_scholar_metrics",
+        "title": "Google Scholar: Academic Research Indexing and Citation Bibliometrics",
+        "source_url": "https://scholar.google.com/",
+        "content": (
+            "Google Scholar provides a simple way to broadly search for scholarly literature across many disciplines and sources: articles, theses, books, abstracts, "
+            "and court opinions. It calculates h-index metrics and citation graphs linking foundational research to modern scientific citations."
+        ),
+        "description": "Broad academic research literature search and citation tracking on Google Scholar.",
+    },
+    {
+        "document_id": "doc_semanticscholar_ai",
+        "title": "Semantic Scholar: AI-Powered Scientific Literature Exploration and Citation Graphs",
+        "source_url": "https://www.semanticscholar.org/",
+        "content": (
+            "Semantic Scholar is a free AI-powered research tool developed by the Allen Institute for AI. Using natural language processing, Semantic Scholar "
+            "extracts key insights, highly influential citations, and methodological relationships across millions of peer-reviewed papers."
+        ),
+        "description": "AI-driven scientific literature navigation and research graphs on Semantic Scholar.",
+    },
+    {
+        "document_id": "doc_acm_digital_library",
+        "title": "ACM Digital Library: Peer-Reviewed Computer Science Research and Conference Proceedings",
+        "source_url": "https://dl.acm.org/",
+        "content": (
+            "The ACM Digital Library is the most comprehensive database of full-text articles and bibliographic records covering computing and information technology. "
+            "It archives Turing Award lectures, SIGMOD database research, SIGIR information retrieval breakthroughs, and SOSP operating systems conferences."
+        ),
+        "description": "Official ACM archive of peer-reviewed computer science literature and conference papers.",
+    },
+    {
+        "document_id": "doc_ieee_xplore_research",
+        "title": "IEEE Xplore: Electrical Engineering, Computer Science and Telecommunications Standards",
+        "source_url": "https://ieeexplore.ieee.org/",
+        "content": (
+            "IEEE Xplore is a scholarly research database indexing over 5 million documents from IEEE and IET publications. It covers neural networks, "
+            "machine learning algorithms, wireless telecommunications standards (802.11 Wi-Fi, 5G), robotics, and signal processing."
+        ),
+        "description": "Peer-reviewed technical literature and international engineering standards on IEEE Xplore.",
     },
 ]
 

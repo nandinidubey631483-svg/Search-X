@@ -17,6 +17,7 @@ import {
   IconFileText,
   IconNewspaper,
   IconGraduationCap,
+  IconExternalLink,
 } from './components/Icons';
 import './index.css';
 
@@ -123,6 +124,287 @@ export function App() {
   const handlePageChange = (newPage) => {
     executeSearch(query, newPage, algo, mode);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const categoryWebsites = {
+    web: [
+      {
+        name: 'Wikipedia',
+        domain: 'en.wikipedia.org',
+        url: 'https://en.wikipedia.org/',
+        desc: 'The free encyclopedia covering science, mathematics, world history, and computer science.',
+        query: 'inverted index wikipedia',
+        badge: 'Encyclopedia',
+      },
+      {
+        name: 'GitHub',
+        domain: 'github.com',
+        url: 'https://github.com/',
+        desc: 'Open source software repositories, developer collaboration, and CI/CD pipelines.',
+        query: 'github actions continuous integration',
+        badge: 'Code & Repos',
+      },
+      {
+        name: 'MDN Web Docs',
+        domain: 'developer.mozilla.org',
+        url: 'https://developer.mozilla.org/',
+        desc: 'Web standards, JavaScript APIs, CSS Grid, and browser runtime documentation.',
+        query: 'javascript event loop mdn',
+        badge: 'Web Standards',
+      },
+      {
+        name: 'Python.org',
+        domain: 'docs.python.org',
+        url: 'https://docs.python.org/',
+        desc: 'Official documentation, standard library references, and language specifications.',
+        query: 'python asyncio event loop',
+        badge: 'Core Language',
+      },
+      {
+        name: 'Stack Overflow',
+        domain: 'stackoverflow.com',
+        url: 'https://stackoverflow.com/',
+        desc: 'Developer knowledge base, programming bug solutions, and architecture questions.',
+        query: 'distributed concurrency memory safety',
+        badge: 'Developer Q&A',
+      },
+      {
+        name: 'React.dev',
+        domain: 'react.dev',
+        url: 'https://react.dev/',
+        desc: 'Official guide to React 19, Server Components, Hooks lifecycle, and modern UI state.',
+        query: 'react server components actions',
+        badge: 'UI Library',
+      },
+    ],
+    images: [
+      {
+        name: 'Unsplash',
+        domain: 'unsplash.com',
+        url: 'https://unsplash.com/',
+        desc: 'High-resolution photography, creative wallpapers, and royalty-free visual media.',
+        query: 'unsplash photography high resolution',
+        badge: 'Stock Photos',
+      },
+      {
+        name: 'Pexels',
+        domain: 'pexels.com',
+        url: 'https://www.pexels.com/',
+        desc: 'Free stock photos, aesthetic desktop backgrounds, and royalty-free visual assets.',
+        query: 'pexels stock photos wallpapers',
+        badge: 'Wallpapers',
+      },
+      {
+        name: 'Pixabay',
+        domain: 'pixabay.com',
+        url: 'https://pixabay.com/',
+        desc: 'Copyright-free vector graphics, digital illustrations, clip art, and photo media.',
+        query: 'pixabay vector graphics illustrations',
+        badge: 'Vector & Art',
+      },
+      {
+        name: 'Wikimedia Commons',
+        domain: 'commons.wikimedia.org',
+        url: 'https://commons.wikimedia.org/',
+        desc: 'Public domain educational schematics, anatomical diagrams, and historical archives.',
+        query: 'wikimedia commons scientific diagrams',
+        badge: 'Educational Media',
+      },
+      {
+        name: 'Openverse',
+        domain: 'openverse.org',
+        url: 'https://openverse.org/',
+        desc: 'Universal search across 700M+ openly licensed Creative Commons images and cultural works.',
+        query: 'openverse creative commons discovery',
+        badge: 'Open License',
+      },
+      {
+        name: 'SVG Repo',
+        domain: 'svgrepo.com',
+        url: 'https://www.svgrepo.com/',
+        desc: '500,000+ scalable vector SVG icons, UI elements, and technical flowchart schematics.',
+        query: 'svg repo vector icons schematics',
+        badge: 'SVG Vectors',
+      },
+    ],
+    documents: [
+      {
+        name: 'RFC Editor',
+        domain: 'rfc-editor.org',
+        url: 'https://www.rfc-editor.org/',
+        desc: 'Official Internet Engineering Task Force (IETF) RFC protocol standards (HTTP/3, QUIC).',
+        query: 'rfc http3 quic specifications',
+        badge: 'IETF Standards',
+      },
+      {
+        name: 'W3C Specifications',
+        domain: 'w3.org',
+        url: 'https://www.w3.org/',
+        desc: 'World Wide Web Consortium standards for HTML5 semantics, DOM APIs, and CSS specs.',
+        query: 'w3c html5 semantic elements',
+        badge: 'Web Consortia',
+      },
+      {
+        name: 'DevDocs',
+        domain: 'devdocs.io',
+        url: 'https://devdocs.io/',
+        desc: 'Fast offline API documentation browser for C++, Rust, Python, Go, and PostgreSQL.',
+        query: 'devdocs offline api documentation',
+        badge: 'API Browser',
+      },
+      {
+        name: 'Linux Kernel Docs',
+        domain: 'kernel.org',
+        url: 'https://www.kernel.org/doc/html/latest/',
+        desc: 'Virtual memory management, slab allocators, process scheduling, and kernel drivers.',
+        query: 'linux kernel virtual memory page',
+        badge: 'OS Architecture',
+      },
+      {
+        name: 'Read the Docs',
+        domain: 'readthedocs.org',
+        url: 'https://readthedocs.org/',
+        desc: 'Automated technical documentation hosting and versioning for open-source libraries.',
+        query: 'read the docs technical documentation',
+        badge: 'Doc Hosting',
+      },
+      {
+        name: 'Rust Lang Book',
+        domain: 'doc.rust-lang.org',
+        url: 'https://doc.rust-lang.org/book/',
+        desc: 'Memory safety guarantees, ownership borrow checker, and fearless concurrency specs.',
+        query: 'rust ownership borrow checker',
+        badge: 'Language Book',
+      },
+    ],
+    news: [
+      {
+        name: 'Hacker News',
+        domain: 'news.ycombinator.com',
+        url: 'https://news.ycombinator.com/',
+        desc: 'Real-time breaking discussions on computer science, distributed systems, and startups.',
+        query: 'hacker news engineering discussions',
+        badge: 'Tech Community',
+      },
+      {
+        name: 'TechCrunch',
+        domain: 'techcrunch.com',
+        url: 'https://techcrunch.com/',
+        desc: 'Artificial intelligence headlines, cloud startups, and venture capital funding news.',
+        query: 'techcrunch ai industry funding',
+        badge: 'VC & Startups',
+      },
+      {
+        name: 'The Verge',
+        domain: 'theverge.com',
+        url: 'https://www.theverge.com/',
+        desc: 'Consumer hardware, semiconductor innovations, browser wars, and modern tech culture.',
+        query: 'the verge emerging technologies',
+        badge: 'Digital Culture',
+      },
+      {
+        name: 'Ars Technica',
+        domain: 'arstechnica.com',
+        url: 'https://arstechnica.com/',
+        desc: 'Deep-dive IT analysis, microarchitecture vulnerabilities, and cybersecurity policy.',
+        query: 'ars technica security linux',
+        badge: 'Deep Tech',
+      },
+      {
+        name: 'BleepingComputer',
+        domain: 'bleepingcomputer.com',
+        url: 'https://www.bleepingcomputer.com/',
+        desc: 'Cybersecurity alerts, zero-day vulnerabilities, ransomware intelligence, and CVEs.',
+        query: 'bleepingcomputer cybersecurity vulnerabilities',
+        badge: 'Cyber Threat Intel',
+      },
+      {
+        name: 'InfoQ',
+        domain: 'infoq.com',
+        url: 'https://www.infoq.com/',
+        desc: 'Enterprise software architecture, microservices, cloud-native DevOps, and frameworks.',
+        query: 'infoq software architecture microservices',
+        badge: 'Enterprise Architecture',
+      },
+    ],
+    scholar: [
+      {
+        name: 'arXiv.org',
+        domain: 'arxiv.org',
+        url: 'https://arxiv.org/',
+        desc: 'Open-access scientific preprints in artificial intelligence, deep learning, and physics.',
+        query: 'arxiv attention transformer neural',
+        badge: 'Preprint Archive',
+      },
+      {
+        name: 'Google Scholar',
+        domain: 'scholar.google.com',
+        url: 'https://scholar.google.com/',
+        desc: 'Scholarly literature search, citation tracking, h-index metrics, and journal articles.',
+        query: 'google scholar citation bibliometrics',
+        badge: 'Citation Index',
+      },
+      {
+        name: 'Semantic Scholar',
+        domain: 'semanticscholar.org',
+        url: 'https://www.semanticscholar.org/',
+        desc: 'AI-powered scientific research discovery, literature navigation, and citation graphs.',
+        query: 'semantic scholar literature exploration',
+        badge: 'AI Research Graph',
+      },
+      {
+        name: 'ACM Digital Library',
+        domain: 'dl.acm.org',
+        url: 'https://dl.acm.org/',
+        desc: 'Peer-reviewed computing research, Turing Award lectures, and SIGIR/SIGMOD papers.',
+        query: 'acm digital library computer science',
+        badge: 'Peer-Reviewed CS',
+      },
+      {
+        name: 'IEEE Xplore',
+        domain: 'ieeexplore.ieee.org',
+        url: 'https://ieeexplore.ieee.org/',
+        desc: 'Electrical engineering, neural networks, telecommunications, and IEEE standards.',
+        query: 'ieee xplore electrical engineering',
+        badge: 'Engineering Journal',
+      },
+      {
+        name: 'Stanford InfoLab',
+        domain: 'stanford.edu',
+        url: 'https://nlp.stanford.edu/IR-book/',
+        desc: 'Information retrieval foundations, vector space ranking, and web graph crawling.',
+        query: 'stanford information retrieval principles',
+        badge: 'Academic Research',
+      },
+    ],
+  };
+
+  const categoryHeaders = {
+    web: {
+      title: 'Featured Web & Knowledge Sources',
+      desc: 'Authoritative encyclopedias, open-source repositories, and developer knowledge bases.',
+      badge: '6 Verified Sources',
+    },
+    images: {
+      title: 'Indexed Image & Visual Media Websites',
+      desc: 'High-resolution photography, SVG vector icons, wallpapers, and scientific schematics.',
+      badge: '6 Visual Media Sites',
+    },
+    documents: {
+      title: 'Official Technical Documentation & Specification Portals',
+      desc: 'Direct access to internet protocol RFCs, W3C standards, kernel docs, and language books.',
+      badge: '6 Documentation Portals',
+    },
+    news: {
+      title: 'Engineering & Technology News Portals',
+      desc: 'Breaking developer discussions, cybersecurity threat alerts, and software architecture trends.',
+      badge: '6 Tech News Outlets',
+    },
+    scholar: {
+      title: 'Academic Research Repositories & Citation Indexes',
+      desc: 'Open-access scientific preprints, peer-reviewed computer science literature, and bibliometrics.',
+      badge: '6 Research Repositories',
+    },
   };
 
   const trendingTopics = [
@@ -353,187 +635,209 @@ export function App() {
               {/* Dynamic Showcase based on activeCategory */}
               {!searchResponse && (
                 <div className="category-showcase-section">
-                  {/* Category 1: WEB -> Trending Searches */}
-                  {activeCategory === 'web' && (
-                    <div className="trending-section">
-                      <div className="trending-header">
-                        <span className="trending-icon">
-                          <IconTrendingUp size={15} />
-                        </span>
-                        <span className="trending-title">Trending Searches</span>
+                  {/* Common Category Verified Websites Directory */}
+                  <div className="category-view-box">
+                    <div className="category-sources-section">
+                      <div className="category-view-header">
+                        <div>
+                          <h3 className="category-view-title">{categoryHeaders[activeCategory]?.title}</h3>
+                          <p className="category-view-desc">{categoryHeaders[activeCategory]?.desc}</p>
+                        </div>
+                        <span className="category-view-badge">{categoryHeaders[activeCategory]?.badge}</span>
                       </div>
 
-                      <div className="trending-pills">
-                        {trendingTopics.map((item) => (
-                          <button
-                            key={item.label}
-                            type="button"
-                            className="trending-pill"
-                            onClick={() => executeSearch(item.query, 1)}
-                          >
-                            <span className="pill-icon">{item.icon}</span>
-                            <span className="pill-text">{item.label}</span>
-                          </button>
+                      <div className="category-sources-grid">
+                        {(categoryWebsites[activeCategory] || []).map((site) => (
+                          <div key={site.domain} className="category-source-card">
+                            <div className="source-card-header">
+                              <div className="source-title-row">
+                                <span className="source-name">{site.name}</span>
+                                <span className="source-badge">{site.badge}</span>
+                              </div>
+                              <span className="source-domain">
+                                <span className="source-domain-dot"></span>
+                                {site.domain}
+                              </span>
+                            </div>
+                            <p className="source-desc">{site.desc}</p>
+                            <div className="source-actions">
+                              <button
+                                type="button"
+                                className="btn-source-search"
+                                onClick={() => executeSearch(site.query, 1)}
+                                title={`Search ${site.name} documents on SearchX`}
+                              >
+                                <IconSearch size={13} /> Search in SearchX
+                              </button>
+                              <a
+                                href={site.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-source-visit"
+                                title={`Visit ${site.domain} directly`}
+                              >
+                                <IconExternalLink size={13} /> Visit Site
+                              </a>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
-                  )}
 
-                  {/* Category 2: IMAGES -> Visual Architecture & Diagram Schematics */}
-                  {activeCategory === 'images' && (
-                    <div className="category-view-box">
-                      <div className="category-view-header">
-                        <div>
-                          <h3 className="category-view-title">Visual Architecture & Schematics Gallery</h3>
-                          <p className="category-view-desc">
-                            Explore indexed technical diagrams, algorithmic curves, and system blueprints.
-                          </p>
+                    {/* Category 1: WEB -> Trending Searches */}
+                    {activeCategory === 'web' && (
+                      <div className="trending-section">
+                        <div className="trending-header">
+                          <span className="trending-icon">
+                            <IconTrendingUp size={15} />
+                          </span>
+                          <span className="trending-title">Trending Searches</span>
                         </div>
-                        <span className="category-view-badge">6 Diagrams Available</span>
-                      </div>
 
-                      <div className="image-showcase-grid">
-                        {visualGallery.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="image-showcase-card"
-                            onClick={() => executeSearch(item.query, 1)}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <div className="image-preview-placeholder">
-                              <IconImage size={28} className="preview-svg-icon" />
-                              <span className="image-dim-tag">{item.dim}</span>
-                            </div>
-                            <div className="image-card-info">
-                              <span className="image-spec-badge">{item.badge}</span>
-                              <h4 className="image-card-title">{item.title}</h4>
-                              <p className="image-card-sub">{item.subtitle}</p>
-                              <div className="image-card-action">
-                                <span className="action-link">Search Schematic &rarr;</span>
+                        <div className="trending-pills">
+                          {trendingTopics.map((item) => (
+                            <button
+                              key={item.label}
+                              type="button"
+                              className="trending-pill"
+                              onClick={() => executeSearch(item.query, 1)}
+                            >
+                              <span className="pill-icon">{item.icon}</span>
+                              <span className="pill-text">{item.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Category 2: IMAGES -> Visual Architecture & Diagram Schematics */}
+                    {activeCategory === 'images' && (
+                      <div className="category-content-subblock">
+                        <div className="category-section-subtitle">
+                          <IconImage size={15} /> Visual Diagrams & Schematics Showcase
+                        </div>
+                        <div className="image-showcase-grid">
+                          {visualGallery.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="image-showcase-card"
+                              onClick={() => executeSearch(item.query, 1)}
+                              role="button"
+                              tabIndex={0}
+                            >
+                              <div className="image-preview-placeholder">
+                                <IconImage size={28} className="preview-svg-icon" />
+                                <span className="image-dim-tag">{item.dim}</span>
+                              </div>
+                              <div className="image-card-info">
+                                <span className="image-spec-badge">{item.badge}</span>
+                                <h4 className="image-card-title">{item.title}</h4>
+                                <p className="image-card-sub">{item.subtitle}</p>
+                                <div className="image-card-action">
+                                  <span className="action-link">Search Schematic &rarr;</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Category 3: DOCUMENTS -> Curated Technical Document Library */}
-                  {activeCategory === 'documents' && (
-                    <div className="category-view-box">
-                      <div className="category-view-header">
-                        <div>
-                          <h3 className="category-view-title">Curated Technical Whitepapers & Tutorials</h3>
-                          <p className="category-view-desc">
-                            Direct access to full documentation files ingested into the SearchX repository.
-                          </p>
+                          ))}
                         </div>
-                        <span className="category-view-badge">6 Ingested Documents</span>
                       </div>
+                    )}
 
-                      <div className="docs-showcase-grid">
-                        {documentLibrary.map((doc) => (
-                          <div key={doc.docId} className="doc-showcase-card">
-                            <div className="doc-card-top">
-                              <span className="doc-type-pill">{doc.category}</span>
-                              <span className="doc-read-time">{doc.readTime}</span>
-                            </div>
-                            <h4 className="doc-card-title">{doc.title}</h4>
-                            <p className="doc-card-desc">{doc.desc}</p>
-                            <div className="doc-card-actions">
-                              <button
-                                type="button"
-                                className="btn-doc-read"
-                                onClick={() => setSelectedDocId(doc.docId)}
-                              >
-                                <IconFileText size={14} className="btn-inline-icon" /> Read Document
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-doc-search"
-                                onClick={() => executeSearch(doc.query, 1)}
-                              >
-                                Search Topic &rarr;
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Category 4: NEWS -> Engineering Releases & Ingestion Logs */}
-                  {activeCategory === 'news' && (
-                    <div className="category-view-box">
-                      <div className="category-view-header">
-                        <div>
-                          <h3 className="category-view-title">Engineering Releases & Ingestion News</h3>
-                          <p className="category-view-desc">
-                            Latest changelogs, crawler ingestion runs, and algorithmic updates from SearchX.
-                          </p>
+                    {/* Category 3: DOCUMENTS -> Curated Technical Document Library */}
+                    {activeCategory === 'documents' && (
+                      <div className="category-content-subblock">
+                        <div className="category-section-subtitle">
+                          <IconFileText size={15} /> Ingested Technical Whitepapers & Manuals
                         </div>
-                        <span className="category-view-badge">Live Changelog</span>
-                      </div>
-
-                      <div className="news-showcase-list">
-                        {engineeringNews.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="news-showcase-item"
-                            onClick={() => executeSearch(item.query, 1)}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <div className="news-meta-row">
-                              <span className="news-date-pill">{item.date}</span>
-                              <span className="news-author">{item.author}</span>
+                        <div className="docs-showcase-grid">
+                          {documentLibrary.map((doc) => (
+                            <div key={doc.docId} className="doc-showcase-card">
+                              <div className="doc-card-top">
+                                <span className="doc-type-pill">{doc.category}</span>
+                                <span className="doc-read-time">{doc.readTime}</span>
+                              </div>
+                              <h4 className="doc-card-title">{doc.title}</h4>
+                              <p className="doc-card-desc">{doc.desc}</p>
+                              <div className="doc-card-actions">
+                                <button
+                                  type="button"
+                                  className="btn-doc-read"
+                                  onClick={() => setSelectedDocId(doc.docId)}
+                                >
+                                  <IconFileText size={14} className="btn-inline-icon" /> Read Document
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-doc-search"
+                                  onClick={() => executeSearch(doc.query, 1)}
+                                >
+                                  Search Topic &rarr;
+                                </button>
+                              </div>
                             </div>
-                            <h4 className="news-item-title">{item.title}</h4>
-                            <p className="news-item-desc">{item.desc}</p>
-                            <span className="news-read-link">Search Ingestion Topic &rarr;</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Category 5: SCHOLAR -> Academic Research & Formulations */}
-                  {activeCategory === 'scholar' && (
-                    <div className="category-view-box">
-                      <div className="category-view-header">
-                        <div>
-                          <h3 className="category-view-title">Academic Research Papers & Algorithmic Citations</h3>
-                          <p className="category-view-desc">
-                            Peer-reviewed information retrieval foundations, term weighting, and indexing papers.
-                          </p>
+                          ))}
                         </div>
-                        <span className="category-view-badge">Peer-Reviewed Papers</span>
                       </div>
+                    )}
 
-                      <div className="scholar-showcase-list">
-                        {scholarPapers.map((paper, idx) => (
-                          <div
-                            key={idx}
-                            className="scholar-showcase-item"
-                            onClick={() => executeSearch(paper.query, 1)}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <div className="scholar-meta-row">
-                              <span className="scholar-pdf-badge">[PDF Research]</span>
-                              <span className="scholar-citations">{paper.citations}</span>
-                              <span className="scholar-year">&bull; {paper.year}</span>
+                    {/* Category 4: NEWS -> Engineering Releases & Ingestion Logs */}
+                    {activeCategory === 'news' && (
+                      <div className="category-content-subblock">
+                        <div className="category-section-subtitle">
+                          <IconNewspaper size={15} /> SearchX Core Ingestion Changelog
+                        </div>
+                        <div className="news-showcase-list">
+                          {engineeringNews.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="news-showcase-item"
+                              onClick={() => executeSearch(item.query, 1)}
+                              role="button"
+                              tabIndex={0}
+                            >
+                              <div className="news-meta-row">
+                                <span className="news-date-pill">{item.date}</span>
+                                <span className="news-author">{item.author}</span>
+                              </div>
+                              <h4 className="news-item-title">{item.title}</h4>
+                              <p className="news-item-desc">{item.desc}</p>
+                              <span className="news-read-link">Search Ingestion Topic &rarr;</span>
                             </div>
-                            <h4 className="scholar-paper-title">{paper.title}</h4>
-                            <p className="scholar-authors">{paper.authors}</p>
-                            <p className="scholar-desc">{paper.desc}</p>
-                            <span className="scholar-search-action">Retrieve Scholarly Topic &rarr;</span>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Category 5: SCHOLAR -> Academic Research & Formulations */}
+                    {activeCategory === 'scholar' && (
+                      <div className="category-content-subblock">
+                        <div className="category-section-subtitle">
+                          <IconGraduationCap size={15} /> Landmark Peer-Reviewed Papers
+                        </div>
+                        <div className="scholar-showcase-list">
+                          {scholarPapers.map((paper, idx) => (
+                            <div
+                              key={idx}
+                              className="scholar-showcase-item"
+                              onClick={() => executeSearch(paper.query, 1)}
+                              role="button"
+                              tabIndex={0}
+                            >
+                              <div className="scholar-meta-row">
+                                <span className="scholar-pdf-badge">[PDF Research]</span>
+                                <span className="scholar-citations">{paper.citations}</span>
+                                <span className="scholar-year">&bull; {paper.year}</span>
+                              </div>
+                              <h4 className="scholar-paper-title">{paper.title}</h4>
+                              <p className="scholar-authors">{paper.authors}</p>
+                              <p className="scholar-desc">{paper.desc}</p>
+                              <span className="scholar-search-action">Retrieve Scholarly Topic &rarr;</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
