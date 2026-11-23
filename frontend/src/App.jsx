@@ -664,6 +664,15 @@ export function App() {
 
   return (
     <div className={`app-layout ${darkMode ? 'theme-dark' : 'theme-light'}`}>
+      {/* Dynamic Animated Ambient Background Canvas */}
+      <div className="animated-bg-canvas" aria-hidden="true">
+        <div className="bg-orb orb-1"></div>
+        <div className="bg-orb orb-2"></div>
+        <div className="bg-orb orb-3"></div>
+        <div className="bg-grid-lattice"></div>
+        <div className="bg-ambient-beam"></div>
+      </div>
+
       <Navbar
         activeTab={activeTab}
         onTabChange={setActiveTab}
