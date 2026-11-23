@@ -621,7 +621,7 @@ complete merely because files were generated.
 
   Module                                  Status        Notes
   --------------------------------------- ------------- -------
-  Project foundation                      Not started   
+  Project foundation                      Verified      Repository initialized on branch main, .gitignore, README.md, docs/decisions configured and verified
   Document model and ingestion contract   Not started   
   Text processing                         Not started   
   C++ inverted index                      Not started   
