@@ -3,6 +3,10 @@
 #include "ranking.hpp"
 #include "document.hpp"
 
+// Ensure assert() is ALWAYS active in test suite, even when compiled in Release mode (-DNDEBUG)
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -61,11 +65,13 @@ void test_roundtrip_save_and_load() {
 
     // Save to disk
     std::string err;
-    assert(original.save(filepath, &err));
+    bool save_ok = original.save(filepath, &err);
+    assert(save_ok);
 
     // Load into a fresh index
     InvertedIndex loaded;
-    assert(loaded.load(filepath, &err));
+    bool load_ok = loaded.load(filepath, &err);
+    assert(load_ok);
 
     // Verify corpus statistics
     assert(loaded.total_documents() == original.total_documents());
@@ -153,11 +159,14 @@ void test_truncated_file() {
         make_doc("d1", "Title", "the quick brown fox", "h1"),
         make_tokens({"the", "quick", "brown", "fox"})
     );
-    assert(index.save(filepath_valid));
+    bool save_ok = index.save(filepath_valid);
+    assert(save_ok);
 
     // Read half of the file and write to truncated file
     std::ifstream src(filepath_valid, std::ios::binary | std::ios::ate);
+    assert(src.is_open());
     std::streamsize size = src.tellg();
+    assert(size > 0);
     src.seekg(0, std::ios::beg);
     std::vector<char> buffer(size / 2);
     src.read(buffer.data(), buffer.size());
@@ -188,10 +197,12 @@ void test_missing_footer() {
         make_doc("d1", "Title", "content text here", "h1"),
         make_tokens({"content", "text", "here"})
     );
-    assert(index.save(filepath_valid));
+    bool save_ok = index.save(filepath_valid);
+    assert(save_ok);
 
     // Remove footer bytes (last 11 bytes)
     std::ifstream src(filepath_valid, std::ios::binary | std::ios::ate);
+    assert(src.is_open());
     std::streamsize size = src.tellg();
     src.seekg(0, std::ios::beg);
     size_t footer_len = std::strlen(IndexSerializer::MAGIC_FOOTER);
