@@ -129,7 +129,17 @@ export function SearchBar({
           <input
             type="text"
             className="search-input"
-            placeholder="Search the web with SearchX..."
+            placeholder={
+              activeCategory === 'images'
+                ? 'Search images, diagrams & architecture visuals...'
+                : activeCategory === 'documents'
+                ? 'Search technical documentation, whitepapers & tutorials...'
+                : activeCategory === 'news'
+                ? 'Search engineering changelogs, blogs & crawl news...'
+                : activeCategory === 'scholar'
+                ? 'Search academic research, IR papers & benchmarks...'
+                : 'Search the web with SearchX...'
+            }
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
