@@ -6,17 +6,17 @@
 :root {
   --primary: #7c3aed;
   --primary-hover: #6d28d9;
-  --primary-light: #f5f3ff;
+  --primary-light: rgba(245, 243, 255, 0.8);
   --primary-accent: #a855f7;
-  --bg-gradient: linear-gradient(135deg, rgba(245, 243, 255, 0.72) 0%, rgba(237, 233, 254, 0.82) 100%);
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-solid: #ffffff;
+  --bg-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(243, 238, 255, 0.45) 50%, rgba(237, 233, 254, 0.65) 100%);
+  --bg-card: rgba(255, 255, 255, 0.82);
+  --bg-card-solid: rgba(255, 255, 255, 0.95);
   --border: rgba(216, 180, 254, 0.45);
   --border-focus: #a855f7;
   --text-main: #1e1b4b;
-  --text-muted: #6b7280;
+  --text-muted: #64748b;
   --text-link: #6d28d9;
-  --shadow-soft: 0 10px 30px -5px rgba(124, 58, 237, 0.12), 0 8px 10px -6px rgba(124, 58, 237, 0.06);
+  --shadow-soft: 0 10px 30px -5px rgba(124, 58, 237, 0.1), 0 8px 10px -6px rgba(124, 58, 237, 0.05);
   --shadow-glow: 0 0 25px rgba(139, 92, 246, 0.35);
   --radius-pill: 9999px;
   --radius-card: 18px;
@@ -28,9 +28,9 @@
   --primary-hover: #c084fc;
   --primary-light: rgba(139, 92, 246, 0.15);
   --primary-accent: #c084fc;
-  --bg-gradient: linear-gradient(135deg, rgba(15, 10, 30, 0.88) 0%, rgba(28, 15, 55, 0.94) 100%);
+  --bg-gradient: linear-gradient(135deg, rgba(15, 10, 30, 0.82) 0%, rgba(28, 15, 55, 0.88) 100%);
   --bg-card: rgba(30, 20, 55, 0.8);
-  --bg-card-solid: #1e1437;
+  --bg-card-solid: rgba(28, 16, 52, 0.95);
   --border: rgba(168, 85, 247, 0.25);
   --border-focus: #c084fc;
   --text-main: #f5f3ff;
