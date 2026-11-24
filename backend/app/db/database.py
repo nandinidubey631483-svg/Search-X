@@ -20,7 +20,10 @@ class Database:
     """Manages database connection pool and transactional sessions."""
 
     def __init__(self, database_url: Optional[str] = None) -> None:
-        self.url = database_url or settings.DATABASE_URL
+        raw_url = database_url or settings.DATABASE_URL
+        if raw_url.startswith("postgres://"):
+            raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+        self.url = raw_url
         connect_args = {}
         if self.url.startswith("sqlite"):
             connect_args = {"check_same_thread": False}
