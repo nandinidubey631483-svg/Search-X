@@ -11,11 +11,18 @@ import {
   IconSearch,
   IconBookOpen,
   IconLayers,
+  IconCheck,
+  IconSparkles,
 } from './Icons';
 
 export function AdminDashboard({ onSourceAdded }) {
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('searchx_admin_key') || '');
+  // Strict in-memory admin authentication state: never persisted to localStorage or cookies
+  const [apiKey, setApiKey] = useState('');
   const [keyInput, setKeyInput] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
+  const [authSuccess, setAuthSuccess] = useState(null);
+
   const [activeSubTab, setActiveSubTab] = useState('sources');
 
   // Sources State
@@ -23,6 +30,7 @@ export function AdminDashboard({ onSourceAdded }) {
   const [newDomain, setNewDomain] = useState('');
   const [sourcesLoading, setSourcesLoading] = useState(false);
   const [sourcesError, setSourcesError] = useState(null);
+  const [sourcesSuccess, setSourcesSuccess] = useState(null);
 
   // Crawl Jobs State
   const [seedUrls, setSeedUrls] = useState('https://example.com');
@@ -38,6 +46,15 @@ export function AdminDashboard({ onSourceAdded }) {
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState(null);
 
+  // Clean up any legacy localStorage entry for security
+  useEffect(() => {
+    try {
+      localStorage.removeItem('searchx_admin_key');
+    } catch {
+      // ignore in environments with restricted storage
+    }
+  }, []);
+
   const fetchSources = useCallback(async () => {
     if (!apiKey) return;
     setSourcesLoading(true);
@@ -46,7 +63,12 @@ export function AdminDashboard({ onSourceAdded }) {
       const data = await api.listSources(apiKey);
       setSources(data);
     } catch (err) {
-      setSourcesError(err.message || 'Failed to fetch sources. Check your Admin API Key.');
+      if (err.status === 401) {
+        setSourcesError('Unauthorized (401): Admin session expired or invalid key. Please re-authenticate.');
+        setApiKey('');
+      } else {
+        setSourcesError(err.message || 'Failed to fetch sources. Check your Admin API Key.');
+      }
     } finally {
       setSourcesLoading(false);
     }
@@ -60,7 +82,12 @@ export function AdminDashboard({ onSourceAdded }) {
       const data = await api.getAnalytics(apiKey);
       setAnalytics(data);
     } catch (err) {
-      setAnalyticsError(err.message || 'Failed to fetch analytics.');
+      if (err.status === 401) {
+        setAnalyticsError('Unauthorized (401): Admin session expired or invalid key. Please re-authenticate.');
+        setApiKey('');
+      } else {
+        setAnalyticsError(err.message || 'Failed to fetch analytics.');
+      }
     } finally {
       setAnalyticsLoading(false);
     }
@@ -73,44 +100,97 @@ export function AdminDashboard({ onSourceAdded }) {
     }
   }, [apiKey, activeSubTab, fetchSources, fetchAnalytics]);
 
-  const handleSaveKey = (e) => {
-    e.preventDefault();
-    if (!keyInput.trim()) return;
+  // Authenticate and validate admin API key against backend
+  const handleSaveKey = async (e) => {
+    if (e) e.preventDefault();
     const clean = keyInput.trim();
-    setApiKey(clean);
-    localStorage.setItem('searchx_admin_key', clean);
+    if (!clean) return;
+
+    setAuthLoading(true);
+    setAuthError(null);
+    setAuthSuccess(null);
+    setSourcesError(null);
+    setSourcesSuccess(null);
+
+    try {
+      // Validate key via protected listSources endpoint
+      const data = await api.listSources(clean);
+      // Valid key: store strictly in memory
+      setApiKey(clean);
+      setSources(data);
+      setAuthSuccess('Admin authenticated successfully. In-memory session active.');
+      setKeyInput('');
+    } catch (err) {
+      setApiKey('');
+      if (err.status === 401 || (err.message && err.message.toLowerCase().includes('unauthorized'))) {
+        setAuthError("Unauthorized: Valid admin API key required. Please verify your SEARCHX_ADMIN_KEY.");
+      } else {
+        setAuthError(err.message || 'Authentication failed. Please verify your credentials and network connection.');
+      }
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
+  // Immediate logout: wipe all sensitive in-memory credentials and state
   const handleClearKey = () => {
     setApiKey('');
     setKeyInput('');
-    localStorage.removeItem('searchx_admin_key');
     setSources([]);
     setAnalytics(null);
+    setAuthError(null);
+    setAuthSuccess(null);
+    setSourcesError(null);
+    setSourcesSuccess(null);
+    try {
+      localStorage.removeItem('searchx_admin_key');
+    } catch {
+      // ignore
+    }
   };
 
   const handleAddSource = async (e) => {
     e.preventDefault();
     if (!newDomain.trim()) return;
+    let domainToAdd = newDomain.trim().toLowerCase();
+    domainToAdd = domainToAdd.replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+    if (!domainToAdd) return;
+
     setSourcesLoading(true);
+    setSourcesError(null);
+    setSourcesSuccess(null);
     try {
-      await api.addSource({ domain: newDomain.trim(), enabled: true }, apiKey);
+      await api.addSource({ domain: domainToAdd, enabled: true }, apiKey);
       setNewDomain('');
+      setSourcesSuccess(`Domain "${domainToAdd}" was successfully added to the permitted crawl whitelist.`);
       await fetchSources();
       if (onSourceAdded) onSourceAdded();
     } catch (err) {
-      setSourcesError(err.message || 'Failed to add source');
+      if (err.status === 401) {
+        setSourcesError('Unauthorized (401): Admin session expired or key invalid. Please re-authenticate.');
+        setApiKey('');
+      } else {
+        setSourcesError(err.message || 'Failed to add permitted domain.');
+      }
     } finally {
       setSourcesLoading(false);
     }
   };
 
   const handleToggleSource = async (source) => {
+    setSourcesError(null);
+    setSourcesSuccess(null);
     try {
       await api.addSource({ domain: source.domain, enabled: !source.enabled }, apiKey);
+      setSourcesSuccess(`Domain "${source.domain}" status updated to ${!source.enabled ? 'Permitted' : 'Blocked'}.`);
       await fetchSources();
     } catch (err) {
-      setSourcesError(err.message || 'Failed to update source');
+      if (err.status === 401) {
+        setSourcesError('Unauthorized (401): Admin session expired or key invalid. Please re-authenticate.');
+        setApiKey('');
+      } else {
+        setSourcesError(err.message || 'Failed to update permitted domain.');
+      }
     }
   };
 
@@ -165,42 +245,72 @@ export function AdminDashboard({ onSourceAdded }) {
             <div className="auth-active">
               <div className="auth-key-badge">
                 <IconKey size={14} className="auth-icon" />
-                <span className="auth-text">Admin Authenticated</span>
+                <span className="auth-text">Admin Authenticated (In-Memory)</span>
               </div>
               <button type="button" className="btn-logout" onClick={handleClearKey}>
-                Lock / Logout
+                Lock Session
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSaveKey} className="auth-form">
-              <input
-                type="password"
-                className="auth-input"
-                placeholder="Enter X-Admin-API-Key..."
-                value={keyInput}
-                onChange={(e) => setKeyInput(e.target.value)}
-                aria-label="Admin API Key"
-              />
-              <button type="submit" className="btn-primary" disabled={!keyInput.trim()}>
-                Unlock
-              </button>
-            </form>
+            <div className="auth-locked-indicator">
+              <IconLock size={14} />
+              <span>Session Locked</span>
+            </div>
           )}
         </div>
       </div>
 
       {!apiKey ? (
-        <div className="unauthorized-card">
+        <div className="unauthorized-card" data-testid="admin-auth-card">
           <div className="unauthorized-icon">
             <IconLock size={44} />
           </div>
           <h2>Admin Authentication Required</h2>
           <p>
-            Please enter your <code>X-Admin-API-Key</code> above to access source management, crawl triggers, and index telemetry.
+            Please enter your <code>X-Admin-API-Key</code> below to access source management, crawl triggers, and index telemetry.
           </p>
-          <div className="key-hint-box">
-            <span className="hint-label">Default Developer Key:</span>
-            <code className="key-code">searchx-admin-secret</code>
+
+          <form onSubmit={handleSaveKey} className="admin-login-form">
+            <div className="login-input-group">
+              <input
+                type="password"
+                className="auth-input login-input-full"
+                placeholder="Enter X-Admin-API-Key..."
+                value={keyInput}
+                onChange={(e) => setKeyInput(e.target.value)}
+                aria-label="Admin API Key"
+                autoComplete="off"
+                disabled={authLoading}
+              />
+              <button
+                type="submit"
+                className="btn-primary btn-login-submit"
+                disabled={authLoading || !keyInput.trim()}
+              >
+                {authLoading ? <span className="spinner-white"></span> : 'Unlock'}
+              </button>
+            </div>
+          </form>
+
+          {authError && (
+            <div className="error-banner auth-error-banner" role="alert">
+              <IconAlertCircle size={16} />
+              <span>{authError}</span>
+            </div>
+          )}
+
+          {authSuccess && (
+            <div className="success-banner auth-success-banner" role="status">
+              <IconCheck size={16} />
+              <span>{authSuccess}</span>
+            </div>
+          )}
+
+          <div className="security-notice-box">
+            <span className="notice-icon">🔒</span>
+            <div className="notice-text">
+              <strong>In-Memory Isolation:</strong> The admin API key is held strictly in memory for this session and is never persisted to <code>localStorage</code>, cookies, or frontend environment variables.
+            </div>
           </div>
         </div>
       ) : (
@@ -262,8 +372,14 @@ export function AdminDashboard({ onSourceAdded }) {
                 </form>
               </div>
 
+              {sourcesSuccess && (
+                <div className="success-banner" role="status">
+                  <IconCheck size={16} /> {sourcesSuccess}
+                </div>
+              )}
+
               {sourcesError && (
-                <div className="error-banner">
+                <div className="error-banner" role="alert">
                   <IconAlertCircle size={15} /> {sourcesError}
                 </div>
               )}

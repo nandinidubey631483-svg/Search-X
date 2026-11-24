@@ -158,5 +158,87 @@ describe('AdminDashboard Component', () => {
       expect(screen.getByText('docs.python.org')).toBeInTheDocument();
       expect(screen.getByText(/Allowed Sources/i)).toBeInTheDocument();
     });
+
+    // Verify key was NOT stored in localStorage
+    expect(localStorage.getItem('searchx_admin_key')).toBeNull();
+  });
+
+  it('displays error banner and remains locked when invalid API key is provided', async () => {
+    const unauthorizedErr = new Error('Unauthorized: valid admin API key required');
+    unauthorizedErr.status = 401;
+    vi.spyOn(api, 'listSources').mockRejectedValue(unauthorizedErr);
+
+    render(<AdminDashboard />);
+
+    const keyInput = screen.getByPlaceholderText(/enter x-admin-api-key/i);
+    fireEvent.change(keyInput, { target: { value: 'wrong-key-secret' } });
+    fireEvent.click(screen.getByRole('button', { name: /unlock/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/valid admin api key required/i)).toBeInTheDocument();
+    });
+
+    // Dashboard must remain locked
+    expect(screen.getByText(/admin authentication required/i)).toBeInTheDocument();
+    expect(localStorage.getItem('searchx_admin_key')).toBeNull();
+  });
+
+  it('adds permitted crawl domain and displays success feedback', async () => {
+    vi.spyOn(api, 'listSources').mockResolvedValue([
+      { domain: 'example.com', enabled: true },
+    ]);
+    const addSourceSpy = vi.spyOn(api, 'addSource').mockResolvedValue({
+      domain: 'wikipedia.org',
+      enabled: true,
+    });
+
+    render(<AdminDashboard />);
+
+    // Unlock
+    const keyInput = screen.getByPlaceholderText(/enter x-admin-api-key/i);
+    fireEvent.change(keyInput, { target: { value: 'valid-admin-secret' } });
+    fireEvent.click(screen.getByRole('button', { name: /unlock/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('example.com')).toBeInTheDocument();
+    });
+
+    // Add permitted domain
+    const domainInput = screen.getByPlaceholderText(/docs\.python\.org/i);
+    fireEvent.change(domainInput, { target: { value: 'https://wikipedia.org/' } });
+    fireEvent.click(screen.getByRole('button', { name: /add source/i }));
+
+    await waitFor(() => {
+      expect(addSourceSpy).toHaveBeenCalledWith(
+        { domain: 'wikipedia.org', enabled: true },
+        'valid-admin-secret'
+      );
+      expect(screen.getByText(/domain "wikipedia.org" was successfully added/i)).toBeInTheDocument();
+    });
+  });
+
+  it('locks session when Lock Session button is clicked', async () => {
+    vi.spyOn(api, 'listSources').mockResolvedValue([
+      { domain: 'example.com', enabled: true },
+    ]);
+
+    render(<AdminDashboard />);
+
+    const keyInput = screen.getByPlaceholderText(/enter x-admin-api-key/i);
+    fireEvent.change(keyInput, { target: { value: 'valid-admin-secret' } });
+    fireEvent.click(screen.getByRole('button', { name: /unlock/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('example.com')).toBeInTheDocument();
+    });
+
+    // Click Lock Session
+    const lockBtn = screen.getByRole('button', { name: /lock session/i });
+    fireEvent.click(lockBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/admin authentication required/i)).toBeInTheDocument();
+      expect(screen.queryByText('example.com')).not.toBeInTheDocument();
+    });
   });
 });
