@@ -30,6 +30,15 @@ This document serves as an exhaustive technical guide to **SearchX**. It explain
 9. [IPC Bridge: Python FastAPI to C++ Engine](#9-ipc-bridge-python-fastapi-to-c-engine)
 10. [Frontend & Secure Authentication Architecture](#10-frontend--secure-authentication-architecture)
 11. [Concept Cross-Reference Matrix](#11-concept-cross-reference-matrix)
+12. [Complete Repository Structure & File-by-File Breakdown](#12-complete-repository-structure--file-by-file-breakdown)
+    - [Project Directory Tree](#project-directory-tree)
+    - [Core Retrieval Engine (`core-engine/`)](#core-retrieval-engine-core-engine)
+    - [FastAPI Backend Service (`backend/`)](#fastapi-backend-service-backend)
+    - [Web Crawler & Ingestion Pipeline (`crawler/`)](#web-crawler--ingestion-pipeline-crawler)
+    - [React Frontend Application (`frontend/`)](#react-frontend-application-frontend)
+    - [Automation & Deployment Scripts (`scripts/`)](#automation--deployment-scripts-scripts)
+    - [Root Infrastructure & Configuration Files](#root-infrastructure--configuration-files)
+
 
 ---
 
@@ -560,3 +569,238 @@ Quick reference mapping theoretical Computer Science concepts to their concrete 
 | **Cache-Aside / LRU Eviction** | `QueryCache::get_search` / `set_search` | [backend/app/cache/redis_cache.py](file:///c:/Users/Dell/OneDrive/Desktop/Searchx/backend/app/cache/redis_cache.py) |
 | **Atomic Database Upsert** | `DatabaseRepository::record_query` | [backend/app/db/repository.py](file:///c:/Users/Dell/OneDrive/Desktop/Searchx/backend/app/db/repository.py) |
 | **In-Memory UI Authentication** | `AdminDashboard` React State Isolation | [frontend/src/components/AdminDashboard.jsx](file:///c:/Users/Dell/OneDrive/Desktop/Searchx/frontend/src/components/AdminDashboard.jsx) |
+
+---
+
+## 12. Complete Repository Structure & File-by-File Breakdown
+
+This section documents every directory and file in SearchX, detailing its primary responsibility and how it interacts with the rest of the system.
+
+### Project Directory Tree
+
+```text
+Searchx/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                          # Continuous Integration pipeline (build, test, verify)
+│       └── codeql.yml                      # Automated security vulnerability & code analysis
+├── backend/
+│   ├── Dockerfile                          # Multi-stage production Docker build (C++ compile + FastAPI)
+│   ├── requirements.txt                    # Python backend production dependencies
+│   ├── app/
+│   │   ├── config.py                       # Global settings & environment security guards
+│   │   ├── main.py                         # FastAPI app entry point, middleware & routing
+│   │   ├── api/
+│   │   │   ├── routes_search.py            # Public search, suggestions, health & document endpoints
+│   │   │   └── routes_admin.py             # Protected admin endpoints (sources, crawl jobs, analytics)
+│   │   ├── cache/
+│   │   │   └── redis_cache.py              # Redis query caching & mock fallback implementation
+│   │   ├── db/
+│   │   │   ├── database.py                 # SQLAlchemy engine, connection pooling & schema bootstrap
+│   │   │   ├── models.py                   # SQLAlchemy ORM table declarations
+│   │   │   ├── repository.py               # Database repository layer (CRUD & atomic analytics)
+│   │   │   └── migrations/
+│   │   │       └── 001_initial_schema.sql  # Database DDL schema migration script
+│   │   ├── models/
+│   │   │   └── schemas.py                  # Pydantic data schemas (DTO validation)
+│   │   └── services/
+│   │       ├── crawler_service.py          # Background crawler orchestrator & DB/index bridge
+│   │       ├── search_service.py           # Core search orchestration, C++ CLI bridge & snippets
+│   │       └── spell_checker.py            # Damerau-Levenshtein typo correction & suggestions
+│   └── tests/
+│       ├── test_api.py                     # Integration tests for FastAPI endpoints & auth
+│       ├── test_config.py                  # Unit tests for settings & production admin key rules
+│       ├── test_database.py                # Unit tests for database models & repository CRUD
+│       ├── test_e2e.py                     # Full end-to-end integration tests (ingestion to search)
+│       ├── test_redis_cache.py             # Unit tests for Redis cache & TTL expiration
+│       └── test_spell_checker.py           # Unit tests for spell checker & candidate ranking
+├── core-engine/
+│   ├── CMakeLists.txt                      # CMake build script for C++17 engine library, CLI & CTest
+│   ├── include/
+│   │   ├── document.hpp                    # Document & Token structs and memory models
+│   │   ├── index_serializer.hpp            # Binary format constants & serializer interface
+│   │   ├── inverted_index.hpp              # InvertedIndex class declaration & postings memory layout
+│   │   └── ranking.hpp                     # Ranker class, BM25 / TF-IDF formulas & ScoredResult struct
+│   ├── src/
+│   │   ├── document.cpp                    # Document model methods (token counting, formatting)
+│   │   ├── engine_cli.cpp                  # CLI entrypoint executable for external process calls
+│   │   ├── index_serializer.cpp            # Low-level binary serialization & deserialization logic
+│   │   ├── inverted_index.cpp              # Inverted index algorithms (AND/OR lookups, fast deletions)
+│   │   └── ranking.cpp                     # BM25 & TF-IDF scoring engines & tie-breaking comparator
+│   └── tests/
+│       ├── test_document.cpp               # CTest unit tests for Document and Token representations
+│       ├── test_inverted_index.cpp         # CTest unit tests for index building & Boolean lookups
+│       ├── test_ranking.cpp                # CTest unit tests for BM25 and TF-IDF relevance ordering
+│       └── test_persistence.cpp            # CTest unit tests for binary roundtrip & corruption resilience
+├── crawler/
+│   ├── requirements.txt                    # Python crawler dependencies (httpx, bs4, lxml)
+│   ├── app/
+│   │   ├── crawler.py                      # Asynchronous BFS web crawler with SSRF & robots guards
+│   │   ├── models.py                       # Crawler data models (Document, CrawlResult)
+│   │   ├── parser.py                       # HTML parser (text extraction & outbound link resolution)
+│   │   └── tokenization.py                 # Text normalizer (Unicode NFKC, lowercasing, regex tokens)
+│   └── tests/
+│       ├── test_crawler.py                 # Unit tests for crawler BFS traversal & SSRF blocks
+│       ├── test_parser.py                  # Unit tests for HTML text extraction & link scraping
+│       └── test_tokenization.py            # Unit tests for Unicode normalization & token offsets
+├── frontend/
+│   ├── index.html                          # Single-page application HTML entrypoint
+│   ├── package.json                        # Node.js dependencies (React 18, Vite, Vitest)
+│   ├── vite.config.js                      # Vite development & production build configuration
+│   ├── public/
+│   │   ├── favicon.svg                     # Browser tab brand icon
+│   │   └── searchx-hero-bg.jpg             # High-resolution hero background asset
+│   └── src/
+│       ├── App.jsx                         # Main React layout, tab switching, search coordinator
+│       ├── index.css                       # Scoped CSS stylesheets, themes & SaaS control center styling
+│       ├── main.jsx                        # React root component DOM mount script
+│       ├── components/
+│       │   ├── AdminDashboard.jsx          # Admin UI with strict in-memory auth & domain whitelist
+│       │   ├── DocumentModal.jsx           # Fullscreen modal dialog displaying document metadata
+│       │   ├── Icons.jsx                   # High-performance inline SVG icons (Lucide-inspired)
+│       │   ├── ImageLightboxModal.jsx      # Lightbox viewer for media search queries
+│       │   ├── Navbar.jsx                  # Header navigation, category selector & dark theme toggle
+│       │   ├── Pagination.jsx              # Search result pagination controls
+│       │   ├── SearchBar.jsx               # Search query input with autocomplete dropdown & filters
+│       │   ├── SearchResultCard.jsx        # Ranked result item card with term highlighting
+│       │   └── SmartImage.jsx              # Robust image component with fallback handling
+│       ├── services/
+│       │   └── api.js                      # REST API client (fetch wrapper with X-Admin-API-Key)
+│       └── tests/
+│           ├── api.test.js                 # Frontend API client unit tests
+│           ├── components.test.jsx         # UI component unit tests (SearchBar, Card, Pagination)
+│           └── integration.test.jsx        # Frontend integration flows (Search, Admin Auth, Whitelist)
+├── scripts/
+│   ├── benchmark.py                        # Benchmark script testing QPS, latency, and memory load
+│   ├── seed_corpus.py                      # Corpus seeder indexing 53 educational CS/IR documents
+│   └── start.sh                            # Production Docker startup entrypoint with $PORT support
+├── .env.example                            # Configuration environment variable template
+├── docker-compose.yml                      # Production Docker Compose orchestration file
+├── nginx.conf                              # Production Nginx reverse-proxy & static asset config
+├── PROJECT_CONTEXT.md                      # Engineering design specification & acceptance criteria
+├── README.md                               # Repository overview, technology badges & setup guide
+└── SEARCHX_ARCHITECTURE_AND_CONCEPTS.md    # This deep-dive architectural & concepts reference
+```
+
+---
+
+### Core Retrieval Engine (`core-engine/`)
+
+The C++ retrieval core provides memory-efficient, deterministic search without garbage collection overhead.
+
+- **`CMakeLists.txt`**: Configures C++17 compilation with optimization flags (`-O3`), defines the `searchx_core` static library, the `searchx_engine` executable, and configures CTest test targets.
+- **`include/document.hpp`**: Declares `searchx::Document` (title, URL, content hash, timestamps, token count) and `searchx::Token` (term string, integer position, character offsets).
+- **`include/inverted_index.hpp`**: Declares `searchx::Posting` and `searchx::InvertedIndex`. Outlines memory structures: the hash dictionary, posting lists, document catalogs, and Boolean lookup signatures.
+- **`include/ranking.hpp`**: Declares the `searchx::Ranker` class, configuration parameters (`BM25Params` with $k_1, b$), matching modes (`MatchMode`), and `ScoredResult` with deterministic tie-breaking.
+- **`include/index_serializer.hpp`**: Declares `searchx::IndexSerializer`, file magic header/footer constants, versioning numbers, and binary save/load declarations.
+- **`src/inverted_index.cpp`**: Implements index construction, inverted dictionary population, two-pointer sorted intersection for Boolean AND, hash set union for Boolean OR, and reverse-mapping document removal (`doc_terms_`).
+- **`src/ranking.cpp`**: Implements logarithmic TF-IDF calculation and Okapi BM25 ranking formulas with document length normalization and corpus statistics.
+- **`src/index_serializer.cpp`**: Implements custom binary serialization and deserialization with bounded allocation guards (`MAX_DOC_COUNT`, `MAX_VOCAB_SIZE`) and exception safety.
+- **`src/engine_cli.cpp`**: Command-line interface executable that accepts subcommands (`search`, `index`, `vocab`, `stats`, `document`) and streams JSON output back to Python.
+- **`tests/test_document.cpp`**: Unit tests verifying token position storage, document field preservation, and equality checks.
+- **`tests/test_inverted_index.cpp`**: Unit tests verifying single-term lookups, multi-term Boolean AND/OR queries, document updates, and removals.
+- **`tests/test_ranking.cpp`**: Unit tests validating TF-IDF and BM25 score calculation, length normalization penalization, and tie-breaking order.
+- **`tests/test_persistence.cpp`**: Unit tests verifying binary disk roundtrips, state preservation on failure, corrupted magic headers, truncated files, and missing footers.
+
+---
+
+### FastAPI Backend Service (`backend/`)
+
+The backend coordinates query orchestration, caching, persistent database catalogs, and administrative controls.
+
+- **`Dockerfile`**: Multi-stage Linux Docker build:
+  - *Stage 1 (Builder)*: Uses Debian Bookworm with GCC/CMake to compile the C++ engine in Release mode and run CTest.
+  - *Stage 2 (Runtime)*: Minimal Python 3.12 image with psycopg, Uvicorn, and copied C++ engine binaries.
+- **`requirements.txt`**: Specifies production Python dependencies (`fastapi`, `uvicorn`, `sqlalchemy`, `psycopg[binary]`, `redis`, `pydantic`).
+- **`app/config.py`**: Central application configuration using `pydantic-settings`. Enforces strict production rules (e.g. prohibiting the default `searchx-admin-secret` in production environments).
+- **`app/main.py`**: FastAPI entrypoint configuring CORS middleware for the frontend, lifespan handlers that run SQL database migrations on boot, and route registration.
+- **`app/api/routes_search.py`**: Public search controller handling `/api/search` (ranked search), `/api/suggestions` (prefix autocomplete), `/api/health` (system telemetry), and `/api/documents/{id}` (document lookup).
+- **`app/api/routes_admin.py`**: Protected controller enforcing `X-Admin-API-Key` authentication on administrative endpoints: `/api/admin/sources`, `/api/admin/crawl-jobs`, and `/api/admin/analytics`.
+- **`app/cache/redis_cache.py`**: Redis client manager handling query result caching (SHA-256 parameter keys, 300s TTL), suggestions caching, write-invalidation, and in-memory mock fallback.
+- **`app/db/database.py`**: SQLAlchemy engine initializer supporting PostgreSQL and SQLite with automatic `postgres://` to `postgresql://` URI normalization.
+- **`app/db/models.py`**: SQLAlchemy ORM entities: `DocumentModel`, `SourceModel`, `CrawlJobModel`, and `SearchQueryModel`.
+- **`app/db/repository.py`**: Repository layer abstracting database access; handles document persistence, crawl job logging, domain whitelist lookups, and atomic query counter increments.
+- **`app/db/migrations/001_initial_schema.sql`**: Production SQL migration script declaring tables, primary keys, foreign keys, and indexes.
+- **`app/models/schemas.py`**: Pydantic DTO models validating API inputs and serializing responses.
+- **`app/services/search_service.py`**: Main search coordinator: checks Redis cache, invokes C++ engine subprocesses via CLI, generates contextual snippets around search terms, and triggers spell correction fallbacks.
+- **`app/services/crawler_service.py`**: Coordinates background crawl tasks, batches crawled pages, formats tab-delimited ingestion payloads, and triggers C++ index updates.
+- **`app/services/spell_checker.py`**: Provides typo detection and suggestion generation using Damerau-Levenshtein edit distance weighted by corpus term frequency.
+- **`tests/test_api.py`**: Integration tests testing all public and protected HTTP endpoints, headers, and C++ search integration.
+- **`tests/test_config.py`**: Security tests validating environment variable guards and admin key validation.
+- **`tests/test_database.py`**: Database tests validating repository CRUD operations and atomic search query upserts.
+- **`tests/test_e2e.py`**: Full-system end-to-end integration tests (crawling to database persistence to C++ ranking).
+- **`tests/test_redis_cache.py`**: Cache tests validating key generation, cache hits/misses, TTL expiration, and cache invalidation.
+- **`tests/test_spell_checker.py`**: Spell checker unit tests verifying typo correction, transposition handling, and candidate ranking.
+
+---
+
+### Web Crawler & Ingestion Pipeline (`crawler/`)
+
+The crawler module safely fetches, parses, normalizes, and tokenizes web documents for ingestion.
+
+- **`requirements.txt`**: Specifies crawler libraries (`httpx`, `beautifulsoup4`, `lxml`).
+- **`app/crawler.py`**: Asynchronous BFS web crawler engine. Features:
+  - Pre-request DNS resolution blocking SSRF targets (private RFC1918, loopback, AWS metadata).
+  - Domain whitelist checking against permitted sources.
+  - `robots.txt` parsing and politeness enforcement.
+  - Configurable BFS `max_depth` and `max_pages` bounds.
+- **`app/models.py`**: Core dataclass models: `Document` (id, title, url, content, content_hash) and `CrawlResult` (pages crawled, indexed count, errors).
+- **`app/parser.py`**: HTML parser using BeautifulSoup and lxml; strips boilerplate tags (`<script>`, `<style>`, `<nav>`), extracts page titles, cleans body text, and extracts outbound links.
+- **`app/tokenization.py`**: Text normalization pipeline:
+  - Unicode NFKC normalization and lowercasing.
+  - Positional regex tokenization returning `Token(term, position, char_start, char_end)`.
+- **`tests/test_crawler.py`**: Unit tests testing crawler queue traversal, domain filtering, and SSRF IP blocking.
+- **`tests/test_parser.py`**: Unit tests validating HTML text extraction, entity decoding, and hyperlink resolution.
+- **`tests/test_tokenization.py`**: Unit tests verifying token position counting, Unicode normalization, and punctuation stripping.
+
+---
+
+### React Frontend Application (`frontend/`)
+
+Modern, responsive user interface built on React 18, Vite, and scoped CSS.
+
+- **`index.html`**: Root HTML5 document with mobile viewport optimization and search meta tags.
+- **`package.json`**: NPM dependencies (React 18, Vite, Vitest, Testing Library).
+- **`vite.config.js`**: Vite configuration supporting JSX transformation and Vitest test runner setup.
+- **`src/main.jsx`**: JavaScript entrypoint that mounts the React root DOM node.
+- **`src/App.jsx`**: Main application component managing search query state, active view routing (Web, Images, Docs, News, Scholar, Admin), and health check telemetry.
+- **`src/index.css`**: Comprehensive CSS styling: responsive design, light/dark themes, animations, search result cards, and the admin dashboard.
+- **`src/services/api.js`**: Isolated API service layer wrapping browser `fetch` calls; attaches `X-Admin-API-Key` headers for protected operations.
+- **`src/components/Navbar.jsx`**: Top header navigation with SearchX brand logo, category switcher, and dark/light mode toggle.
+- **`src/components/SearchBar.jsx`**: Primary search input with instant autocomplete suggestions, search filter dropdowns (Algorithm: BM25/TF-IDF, Match Mode: Any/All), and speech/lens UI buttons.
+- **`src/components/SearchResultCard.jsx`**: Renders individual ranked search results with title, URL, contextual snippet with bold term highlighting, and relevance score badge.
+- **`src/components/Pagination.jsx`**: Numbered pagination navigation bar with previous/next page buttons.
+- **`src/components/DocumentModal.jsx`**: Modal dialog displaying full document contents and metadata when a user clicks "View Full Document".
+- **`src/components/ImageLightboxModal.jsx`**: Lightbox media viewer for exploring image search results with high-resolution previews.
+- **`src/components/SmartImage.jsx`**: Image loader with smooth lazy-loading and graceful fallback when images fail to load.
+- **`src/components/AdminDashboard.jsx`**: Control center featuring:
+  - Strict in-memory authentication login gate (never persisted to `localStorage`).
+  - Permitted crawl domain whitelist management (add, enable, disable).
+  - Web crawler dispatch form (seeds, depth, page limits) and job telemetry.
+  - Redis cache and query frequency analytics visualization.
+- **`src/components/Icons.jsx`**: High-performance SVG icons (Lucide-inspired) avoiding heavy third-party icon libraries.
+- **`src/tests/api.test.js`**: Unit tests verifying frontend API client parameter serialization and header attachments.
+- **`src/tests/components.test.jsx`**: Component tests verifying SearchBar, SearchResultCard, and Pagination user interactions.
+- **`src/tests/integration.test.jsx`**: Flow tests verifying homepage rendering, search execution, zero-results handling, admin authentication gate, in-memory isolation, and domain whitelist addition.
+
+---
+
+### Automation & Deployment Scripts (`scripts/`)
+
+- **`scripts/start.sh`**: Production container entrypoint script for Render/Docker:
+  - Runs database migrations and seeds initial corpus documents via `scripts/seed_corpus.py`.
+  - Starts Uvicorn server bound to `0.0.0.0` on dynamically allocated `${PORT:-8000}`.
+- **`scripts/seed_corpus.py`**: Corpus ingestion script that parses and indexes 53 comprehensive Computer Science and Information Retrieval documents into PostgreSQL and the C++ engine index segment.
+- **`scripts/benchmark.py`**: Performance evaluation script that measures search query latency (p50, p95, p99), throughput (queries per second), and memory footprint under concurrent load.
+
+---
+
+### Root Infrastructure & Configuration Files
+
+- **`docker-compose.yml`**: Declarative multi-container configuration orchestrating PostgreSQL 16, Redis 7, Backend (FastAPI + C++ engine), and Frontend (Nginx + React) on an internal bridge network.
+- **`nginx.conf`**: Production Nginx configuration providing Gzip static asset compression, SPA route fallback (`try_files $uri /index.html`), and `/api/` reverse-proxy forwarding.
+- **`.env.example`**: Reference template documenting all configurable environment variables (`ENVIRONMENT`, `SEARCHX_ADMIN_KEY`, `DATABASE_URL`, `REDIS_URL`, `SEARCHX_CACHE_TTL`).
+- **`PROJECT_CONTEXT.md`**: Master system specification, architectural guidelines, and module acceptance criteria.
+- **`README.md`**: Project presentation document with badges, architecture summary, and quick-start instructions.
+- **`SEARCHX_ARCHITECTURE_AND_CONCEPTS.md`**: Complete deep-dive architectural, mathematical, and data structures documentation.
+
