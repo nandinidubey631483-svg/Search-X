@@ -52,8 +52,10 @@ COPY backend/ /app/backend/
 COPY crawler/ /app/crawler/
 COPY scripts/ /app/scripts/
 
-# Ensure scripts and C++ engine binary are executable, create application data directory, and setup non-root user
-RUN chmod +x /app/core-engine/build/searchx_engine /app/scripts/*.py && \
+# Ensure scripts and C++ engine binary are executable (stripping CRLF), create data directory, and setup non-root user
+RUN sed -i 's/\r$//' /app/scripts/*.sh && \
+    chmod +x /app/core-engine/build/searchx_engine /app/scripts/*.py /app/scripts/*.sh && \
+    ln -sf /app/scripts/start.sh /app/start.sh && \
     useradd -m -u 1000 searchx && \
     mkdir -p /data && \
     chown -R searchx:searchx /app /data
@@ -72,4 +74,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["sh", "-c", "python3 scripts/seed_corpus.py && python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["/app/scripts/start.sh"]
