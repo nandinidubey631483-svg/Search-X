@@ -30,32 +30,37 @@ FROM python:3.12-slim-bookworm AS runtime
 
 WORKDIR /app
 
-# Install system runtime dependencies
+# Install system runtime dependencies and ensure python/python3 symlinks exist across all bin paths
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpq5 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/local/bin/python3 /usr/bin/python && \
+    ln -sf /usr/local/bin/python3 /usr/bin/python3 && \
+    ln -sf /usr/local/bin/python3 /usr/local/bin/python
 
 # Install Python application dependencies
 COPY backend/requirements.txt /app/backend/requirements.txt
-RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt && \
+    ln -sf /usr/local/bin/uvicorn /usr/bin/uvicorn
 
 # Copy compiled C++ binary from builder stage
 COPY --from=cxx-builder /build/core-engine/build/searchx_engine /app/core-engine/build/searchx_engine
-RUN chmod +x /app/core-engine/build/searchx_engine
 
 # Copy application source code
 COPY backend/ /app/backend/
 COPY crawler/ /app/crawler/
 COPY scripts/ /app/scripts/
 
-# Create application data directory and non-root security user
-RUN useradd -m -u 1000 searchx && \
+# Ensure scripts and C++ engine binary are executable, create application data directory, and setup non-root user
+RUN chmod +x /app/core-engine/build/searchx_engine /app/scripts/*.py && \
+    useradd -m -u 1000 searchx && \
     mkdir -p /data && \
     chown -R searchx:searchx /app /data
 
 USER searchx
 
+ENV PATH="/usr/local/bin:/usr/bin:$PATH"
 ENV PYTHONPATH=/app
 ENV SEARCHX_ENGINE_BIN=/app/core-engine/build/searchx_engine
 ENV SEARCHX_INDEX_PATH=/data/searchx_index.bin
@@ -67,4 +72,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python3 scripts/seed_corpus.py && python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

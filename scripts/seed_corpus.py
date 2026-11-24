@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Seed corpus ingestion script for SearchX.
 Indexes representative educational documents covering Information Retrieval,
